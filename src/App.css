@@ -24,15 +24,8 @@
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.cont-geral{
+  min-height: 50vh;
+  border: #14161a solid;
+  border-radius: 0.3em;
 }

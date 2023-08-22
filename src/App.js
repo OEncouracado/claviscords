@@ -1,22 +1,34 @@
-import logo from './logo.svg';
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Tab from 'react-bootstrap/Tab';
+import Tabs from 'react-bootstrap/Tabs';
+import { Container } from 'react-bootstrap';
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+      <Container className="cont-geral">
+        <Tabs
+          defaultActiveKey="profile"
+          id="justify-tab-example"
+          className="mb-3"
+          justify
         >
-          Learn React
-        </a>
+          <Tab eventKey="home" title="Home">
+            Tab content for Home
+          </Tab>
+          <Tab eventKey="profile" title="Profile">
+            Tab content for Profile
+          </Tab>
+          <Tab eventKey="longer-tab" title="Loooonger Tab">
+            Tab content for Loooonger Tab
+          </Tab>
+          <Tab eventKey="contact" title="Contact">
+            Tab content for Contact
+          </Tab>
+        </Tabs>
+      </Container>
       </header>
     </div>
   );
