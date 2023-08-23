@@ -3,12 +3,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import { Container } from 'react-bootstrap';
+import Claviculario from './components/home';
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-      <Container className="cont-geral">
+      <Container className="cont-geral px-0">
         <Tabs
           defaultActiveKey="profile"
           id="justify-tab-example"
@@ -16,8 +17,9 @@ function App() {
           justify
         >
           <Tab eventKey="home" title="Home">
-            Tab content for Home
+            <Claviculario/>
           </Tab>
+            
           <Tab eventKey="profile" title="Profile">
             Tab content for Profile
           </Tab>

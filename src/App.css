@@ -29,3 +29,16 @@
   border: #14161a solid;
   border-radius: 0.3em;
 }
+
+.framechave{
+  height: auto;
+  width:fit-content;
+}
+
+.chave{
+  color: blue;
+}
+
+.nomechave{
+  color: white;
+}
