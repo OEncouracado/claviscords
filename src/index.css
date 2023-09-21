@@ -11,3 +11,61 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* .chavetamanho.chavetamanhosem{
+  width: 10rem;
+} */
+
+
+.nav-link {
+  color:white !important;
+}
+
+.nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+  color: var(--bs-nav-tabs-link-active-color) !important;
+}
+
+.framechave{
+  max-width: 10.5rem;
+  max-height: 19rem;
+  min-height: 19rem;
+}
+.nomeChave{
+  overflow: hidden;
+  font-size:medium;
+}
+
+.chavetamanho{
+  width: 10rem;
+  background-color: blue;
+}
+
+.chavetamanhosem{
+  width: 10rem;
+  background-color: #ff0000;
+  animation: piscar .5s 3 alternate;
+}
+
+.pai{
+  width: 80%;
+}
+@keyframes piscar {
+  0% {
+    background-color: #ff0000; /* Cor inicial */
+  }
+  100% {
+    background-color: #ffffff; /* Cor intermédia (opcional) */
+  }
+  /* 100% {
+    background-color: #ff0000;
+  } */
+}
+
+@media (max-width: 500px) {
+  .pai {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+}
+
