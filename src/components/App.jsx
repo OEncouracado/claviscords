@@ -1,6 +1,7 @@
 import React from 'react';
 import { Container, Tab, Tabs } from 'react-bootstrap';
 import Claviculario from '../components/home';
+import ApiComponent from '../components/apiComponet';
 import logo from "../images/logo.png";
 import "../App.css"
 
@@ -25,7 +26,7 @@ function Appx() {
             <Tab eventKey="retir" title="Retiradas">
                 <Container className="p-0 d-flex justify-content-center" >
                     <div className='bg-info' style={{width:"80%" , height:"90vh"}}>
-                        Retiradas
+                        <ApiComponent />
                     </div>
                 </Container>
             </Tab>

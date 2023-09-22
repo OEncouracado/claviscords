@@ -70,6 +70,6 @@ switch ($method) {
         echo encryptData(json_encode($response), 'sua_chave_de_criptografia');
         break;
 }
-// Chave Criptografica: 8Zf&1s#p2^J@7qXt9U$0Yk*l4G3H
+// Chave Criptografica: 0123456789ABCDEF0123456789ABCDEF
 
 ?>
