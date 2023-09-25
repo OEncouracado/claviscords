@@ -46,6 +46,17 @@ code {
   animation: piscar .5s 3 alternate;
 }
 
+.searchboxitems,
+.transparent {
+  background: transparent;
+}
+
+.form-control-transparent,
+.form-control-transparent:focus {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
 .pai{
   width: 80%;
 }

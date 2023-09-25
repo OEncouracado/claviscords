@@ -50,6 +50,8 @@
   left: .5%;
 }
 
+
+
 @media (max-width: 500px) {
   .logomarca{
     width: 80%;
@@ -59,3 +61,4 @@
     padding: 0 !important;
   }
 }
+

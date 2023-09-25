@@ -25,7 +25,7 @@ function Appx() {
             </Tab>
             <Tab eventKey="retir" title="Retiradas">
                 <Container className="p-0 d-flex justify-content-center" >
-                    <div className='bg-info' style={{width:"80%" , height:"90vh"}}>
+                    <div className='' style={{width:"80%" , height:"90vh"}}>
                         <ApiComponent />
                     </div>
                 </Container>
