@@ -68,21 +68,6 @@ code {
 .pai{
   width: 80%;
 }
-.backG{
-  width: 100vw;
-  height: 100vh;
-}
-.contlogin{
-  width:fit-content !important;
-  background-color: whitesmoke;
-  background-image: url("./images/keysbg.jpeg");
-  background-size: cover;
-  background-blend-mode:overlay;
-}
-.imagelogin{
-  width:20rem;
-}
-
 @keyframes piscar {
   0% {
     background-color: #ff0000; /* Cor inicial */
@@ -95,14 +80,11 @@ code {
   } */
 }
 
-@media (max-width: 800px) {
+@media (max-width: 500px) {
   .pai {
     width: 100%;
     padding: 0;
     margin: 0;
-  }
-  .imagelogin{
-    width: 15rem;
   }
 }
 

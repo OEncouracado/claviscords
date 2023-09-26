@@ -5,15 +5,20 @@ import CryptoJS from 'crypto-js';
 import axios from 'axios';
 import { BsSearch } from 'react-icons/bs';
 import "../../index.css"
+import CenteredModal from './Modal';
 
 function Claviculario() {
   const [currentPage, setCurrentPage] = useState(1);
   const chavesPerPage = 10;
   const [chaves, setChaves] = useState([]);
-   const [searchTerm, setSearchTerm] = useState(''); // Estado para armazenar o valor da caixa de pesquisa
+  const [searchTerm, setSearchTerm] = useState(''); // Estado para armazenar o valor da caixa de pesquisa
+  const [show, setShow] = useState(false);
+  const [modalData, setModalData] = useState([]);
+
+  
 
   useEffect(() => {
-    axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves")
+    axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves",{timeout: 5000})
       .then(response => {
         try {
           // Descriptografa os dados
@@ -53,8 +58,10 @@ function Claviculario() {
   };
 
   const filteredChaves = chaves.filter((chave) =>
-  chave.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  chave.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  chave.numero.toString().includes(searchTerm)
 );
+
 
   const handleSearchKeyPress = (event) => {
     if (event.key === 'Enter') {
@@ -62,11 +69,11 @@ function Claviculario() {
     }
   };
 
-  const toggleChave = (id) => {
-    setChaves(chaves.map(chave =>
-      chave.id === id ? { ...chave, chaveOn: !chave.chaveOn } : chave
-    ));
-  };
+  // const toggleChave = (id) => {
+  //   setChaves(chaves.map(chave =>
+  //     chave.id === id ? { ...chave, chaveOn: !chave.chaveOn } : chave
+  //   ));
+  // };
 
   const indexOfLastChave = currentPage * chavesPerPage;
   const indexOfFirstChave = indexOfLastChave - chavesPerPage;
@@ -81,7 +88,7 @@ function Claviculario() {
         placement="top"
         overlay={<Tooltip><strong>{chave.nome}</strong></Tooltip>} // Substitua 'chave.dica' pelo campo que contém a dica
       >
-        <div onClick={() => toggleChave(chave.id)} className="framechave d-flex flex-column align-items-center border p-1 m-1 ">
+        <div onClick={() => handleShow(chave)} className="framechave d-flex flex-column align-items-center border p-1 m-1 ">
           <p className='m-0'>{chave.numero}</p>
           <img
             className={chave.chaveOn ? 'chavetamanho' : 'chavetamanhosem'}
@@ -93,6 +100,13 @@ function Claviculario() {
       </OverlayTrigger>
     ));
   };
+
+  const handleClose = () => setShow(false);
+  
+  const handleShow = (chave) => {
+    setShow(true);
+    setModalData(chave);
+  }
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -128,8 +142,21 @@ function Claviculario() {
         {pageNumbers}
       </Pagination>
     </div>
+    
+    <CenteredModal show={show} handleClose={handleClose} modalData={modalData}/>
+  {/* <Modal show={show} onHide={handleClose} centered>
+    <ModalHeader>
+    <ModalTitle>Teste de Modal</ModalTitle>
+    </ModalHeader>
+    <ModalBody>
+      Teste  
+    </ModalBody>    
+  </Modal> */}
     </>
   );
+
+
+  
 }
 
 export default Claviculario;

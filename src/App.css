@@ -25,7 +25,8 @@
 }
 
 .cont-geral{
-  min-height: 50vh;
+  min-height: 97vh;
+  max-height: 97vh;
   border: #14161a solid;
   border-radius: 0.3em;
 }
@@ -50,15 +51,28 @@
   left: .5%;
 }
 
+.modal-content{
+  background-color: rgb(44, 44, 44);
+  border-color: white;
+ 
+ }
 
+ .desenvpor{
+  font-size:1rem;
+  margin-bottom: 0;
+ }
 
-@media (max-width: 500px) {
+@media (max-width: 800px) {
   .logomarca{
     width: 80%;
     position: relative;
   };
   .container1{
     padding: 0 !important;
+    max-width: 100vw !important;
+  }
+  .cont-geral{
+    max-height: none;
   }
 }
 
