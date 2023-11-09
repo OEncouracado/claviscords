@@ -18,7 +18,7 @@ function Claviculario() {
   
 
   useEffect(() => {
-    axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves",{timeout: 5000})
+    axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves",{timeout: 50000})
       .then(response => {
         try {
           // Descriptografa os dados
@@ -83,11 +83,11 @@ function Claviculario() {
 
   const renderChaves = () => {
     return currentChaves.map(chave => (
-      <OverlayTrigger
-        key={chave.id}
-        placement="top"
-        overlay={<Tooltip><strong>{chave.nome}</strong></Tooltip>} // Substitua 'chave.dica' pelo campo que contém a dica
-      >
+      // <OverlayTrigger
+      //   key={chave.id}
+      //   placement="top"
+      //   overlay={<Tooltip><strong>{chave.nome}</strong></Tooltip>} // Substitua 'chave.dica' pelo campo que contém a dica
+      // >
         <div onClick={() => handleShow(chave)} className="framechave d-flex flex-column align-items-center border p-1 m-1 ">
           <p className='m-0'>{chave.numero}</p>
           <img
@@ -97,7 +97,7 @@ function Claviculario() {
           />
           <p className='nomeChave m-0'>{chave.nome}</p>
         </div>
-      </OverlayTrigger>
+       // </OverlayTrigger>
     ));
   };
 

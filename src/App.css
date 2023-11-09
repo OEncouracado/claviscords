@@ -25,8 +25,8 @@
 }
 
 .cont-geral{
-  min-height: 97vh;
-  max-height: 97vh;
+  /* min-height: 97vh;
+  max-height: 97vh; */
   border: #14161a solid;
   border-radius: 0.3em;
 }
@@ -35,7 +35,9 @@
   height: auto;
   width:fit-content;
 }
-
+.framechave:hover{
+  cursor: pointer;
+}
 .chave{
   color: blue;
 }

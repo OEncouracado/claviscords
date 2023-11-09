@@ -17,7 +17,7 @@ function Appx() {
             justify
           >
             <Tab eventKey="home" title="Claviculário" >
-                <Container className="conteiner1 p-0 d-flex justify-content-center" >
+                <Container className="p-0 d-flex justify-content-center" >
                     <Claviculario/>
                 </Container>
 
