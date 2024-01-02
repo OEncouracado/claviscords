@@ -68,6 +68,10 @@ code {
 .pai{
   width: 80%;
 }
+
+.lista{
+  width: 100%;
+}
 @keyframes piscar {
   0% {
     background-color: #ff0000; /* Cor inicial */
@@ -88,3 +92,6 @@ code {
   }
 }
 
+tr { height: 2.2em !important; 
+
+}

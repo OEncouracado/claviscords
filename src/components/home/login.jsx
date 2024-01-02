@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Container, Form, Image } from 'react-bootstrap'
+import { Alert, Button, Container, Form, Image } from 'react-bootstrap'
 import './index.css'
 import logo from "../../images/logo.png"
 import axios from 'axios';
@@ -8,6 +8,7 @@ import CryptoJS from 'crypto-js';
 function Login() {
   const [nome , setNome] = useState('');
   const [senha , setSenha] = useState(''); // eslint-disable-next-line
+  const [showMensagem , setShowMensagem] = useState(false)
   const [mensagem, setMensagem] = useState('');// eslint-disable-next-line
   const [tipoMensagem, setTipoMensagem] = useState('');// eslint-disable-next-line
 
@@ -51,17 +52,27 @@ function Login() {
         // Descriptografa os dados
         const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
         console.log('Login bem-sucedido', decryptedData);
-        setMensagem(decryptedData.data);
+
+        const tokenObject = JSON.parse(decryptedData);
+        console.log(tokenObject);
+        setMensagem(tokenObject.message);
+        console.log(tokenObject.message);
+        console.log(mensagem);
         setTipoMensagem('success');
-        const token = decryptedData.data.token;
-        // localStorage.setItem('token', token);
-        console.log(token);
+        const token = tokenObject.token;
+        localStorage.setItem('token', token);
+        console.log('token:',token);
+        setShowMensagem(true);
+        window.location.reload();
 
       } catch (error) {
         console.error('Erro ao processar os dados:', error);
       }
     })
     .catch(error => {
+      setTipoMensagem('danger');
+      setMensagem('Erro ao tentar entrar, verifique seu usuário e sua senha e tente novamente.');
+      setShowMensagem(true);
       console.error('Erro ao obter as chaves:', error);
     });
   }
@@ -69,7 +80,7 @@ function Login() {
 
   return (
     
-    <div className="backG d-flex align-items-center justify-content-center">
+    <div className="backG d-flex flex-column align-items-center justify-content-center">
     <Container className='contlogin border rounded border-dark' >
       <Form className="d-flex flex-column align-items-center m-3" onSubmit={handleSubmit}>
         <Image className='imagelogin' src={logo} rounded />
@@ -81,6 +92,7 @@ function Login() {
                 placeholder="Usuário"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
+                required
             />
         </Form.Group>
         <Form.Group>
@@ -91,11 +103,14 @@ function Login() {
             placeholder="Senha"
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
+            required
             />
         </Form.Group>
         <Button type="submit" >Entrar</Button>
       </Form>
+      
     </Container>
+    <Alert className='alertaLogin' show={showMensagem} variant={tipoMensagem}><p>{mensagem}</p></Alert>
     </div>
   )
 }

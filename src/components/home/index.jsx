@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import chaveImag from "../../images/chave.webp";
-import { Form, InputGroup, OverlayTrigger, Pagination, Tooltip } from 'react-bootstrap';
+import { Form, InputGroup, Pagination,} from 'react-bootstrap';
 import CryptoJS from 'crypto-js';
 import axios from 'axios';
 import { BsSearch } from 'react-icons/bs';
 import "../../index.css"
 import CenteredModal from './Modal';
+
 
 function Claviculario() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,15 +15,16 @@ function Claviculario() {
   const [searchTerm, setSearchTerm] = useState(''); // Estado para armazenar o valor da caixa de pesquisa
   const [show, setShow] = useState(false);
   const [modalData, setModalData] = useState([]);
+  const [shouldUpdate, setShouldUpdate] = useState(false);
 
-  
 
   useEffect(() => {
-    axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves",{timeout: 50000})
+    if (shouldUpdate || !chaves.length) {axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves")
       .then(response => {
         try {
           // Descriptografa os dados
           const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
+          // const decryptedData = decryptAES(response.data, process.env.REACT_APP_API_KEY);
           if (decryptedData && Array.isArray(decryptedData)) {
             // Se decryptedData for um array, você pode configurar as chaves no estado
             setChaves(decryptedData);
@@ -35,8 +37,9 @@ function Claviculario() {
       })
       .catch(error => {
         console.error('Erro ao obter as chaves:', error);
-      });
-  }, []);
+      });}
+  }
+  , [shouldUpdate, chaves]);
 
   const decryptAES = (encryptedData, password) => {
     try {
@@ -69,12 +72,6 @@ function Claviculario() {
     }
   };
 
-  // const toggleChave = (id) => {
-  //   setChaves(chaves.map(chave =>
-  //     chave.id === id ? { ...chave, chaveOn: !chave.chaveOn } : chave
-  //   ));
-  // };
-
   const indexOfLastChave = currentPage * chavesPerPage;
   const indexOfFirstChave = indexOfLastChave - chavesPerPage;
   const currentChaves = filteredChaves.slice(indexOfFirstChave, indexOfLastChave);
@@ -83,11 +80,7 @@ function Claviculario() {
 
   const renderChaves = () => {
     return currentChaves.map(chave => (
-      // <OverlayTrigger
-      //   key={chave.id}
-      //   placement="top"
-      //   overlay={<Tooltip><strong>{chave.nome}</strong></Tooltip>} // Substitua 'chave.dica' pelo campo que contém a dica
-      // >
+      
         <div onClick={() => handleShow(chave)} className="framechave d-flex flex-column align-items-center border p-1 m-1 ">
           <p className='m-0'>{chave.numero}</p>
           <img
@@ -97,11 +90,13 @@ function Claviculario() {
           />
           <p className='nomeChave m-0'>{chave.nome}</p>
         </div>
-       // </OverlayTrigger>
-    ));
+           ));
   };
 
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setShow();
+    renderChaves();
+  };
   
   const handleShow = (chave) => {
     setShow(true);
@@ -120,7 +115,7 @@ function Claviculario() {
   }
 
   return (<>
-    <div className="pai d-flex flex-column justify-content-center align-items-center">
+    <div className="pai d-flex flex-column justify-content-center align-items-center" >
        <div className="position-relative w-auto searchboxitems rounded">
           <InputGroup.Text>
             <Form.Control
@@ -143,15 +138,7 @@ function Claviculario() {
       </Pagination>
     </div>
     
-    <CenteredModal show={show} handleClose={handleClose} modalData={modalData}/>
-  {/* <Modal show={show} onHide={handleClose} centered>
-    <ModalHeader>
-    <ModalTitle>Teste de Modal</ModalTitle>
-    </ModalHeader>
-    <ModalBody>
-      Teste  
-    </ModalBody>    
-  </Modal> */}
+    <CenteredModal show={show} handleClose={handleClose} modalData={modalData} setShouldUpdate={setShouldUpdate}/>
     </>
   );
 

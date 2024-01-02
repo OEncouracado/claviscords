@@ -1,15 +1,24 @@
-import React from 'react';
-import { Container, Tab, Tabs } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Button, Container, Modal, Tab, Tabs } from 'react-bootstrap';
 import Claviculario from '../components/home';
 import logo from "../images/logo.png";
 import "../App.css"
+import Registros from './home/registros';
 
 function Appx() {
-  return (
+  const [show, setShow] = useState(false)
+  const handleClose = () => {
+    localStorage.removeItem('token');
+    setShow(false);
+    window.location.reload();
+  }
+  return (<>
+  <Button className='fechar' variant='danger' onClick={() => setShow(true)}>X</Button>
     <div className="App">
       <header className="App-header">
         <img className='logomarca mt-1 mb-0' src={logo} alt='claviscord logo'/>
         <Container className="cont-geral px-0">
+
           <Tabs
             defaultActiveKey="home"
             id="tabs"
@@ -24,21 +33,17 @@ function Appx() {
             </Tab>
             <Tab eventKey="retir" title="Retiradas">
                 <Container className="p-0 d-flex justify-content-center" >
-                    <div className='' style={{width:"80%" , height:"100%"}}>
-                      Retiradas
-                    </div>
+                      <Registros tipo={'retirada'}/>
                 </Container>
             </Tab>
             <Tab eventKey="devol" title="Devoluções">
             <Container className="p-0 d-flex justify-content-center" >
-                    <div className='bg-info' style={{width:"80%" , height:"100%"}}>
-                        Devoluções
-                    </div>
+                      <Registros tipo={'devolucao'}/>
                 </Container>
             </Tab>
             <Tab eventKey="config" title="Configurações">
             <Container className="p-0 d-flex justify-content-center" >
-                    <div className='bg-info' style={{width:"80%" , height:"100%"}}>
+                    <div className="pai" style={{height:"40rem"}}>
                         Configurações
                     </div>
                 </Container>
@@ -49,7 +54,27 @@ function Appx() {
       </header>
       
     </div>
-  );
+    <Modal
+        show={show}
+        onHide={() => setShow(false)}
+        backdrop="static"
+        keyboard={false}
+        className='text-white'
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Você está saindo do Programa...</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Clique em "Sair" para sair do programa
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="success" onClick={handleClose}>
+            Sair
+          </Button>
+          <Button variant="primary" onClick={() => setShow(false)}>Cancelar</Button>
+        </Modal.Footer>
+      </Modal>
+  </>);
 }
 
 export default Appx;

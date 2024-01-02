@@ -52,7 +52,22 @@
   top: 0;
   left: .5%;
 }
+.fechar{
+  position: absolute;
+  top: 0;
+  right: .5%;
+}
 
+.alertaFechar{
+  right: 50%;
+  left: 50%;
+  width: 40vw;
+}
+
+.alertaLogin{
+  width: 50%;
+  margin-top: 2rem;
+}
 .modal-content{
   background-color: rgb(44, 44, 44);
   border-color: white;
