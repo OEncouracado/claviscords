@@ -5,15 +5,11 @@ import axios from 'axios';
 
 function CenteredModal({ show, handleClose, modalData, setShouldUpdate }) {
     const [nomePessoa, setNomePessoa] = useState('');
-    // console.log(modalData.id)
     // eslint-disable-next-line
     const [token , setToken] = useState(localStorage.getItem('token'));
-    const tokenObj = JSON.parse(token);// eslint-disable-next-line
+    const tokenObj = JSON.parse(token);
+    // eslint-disable-next-line
     const { id, nome, Adm } = tokenObj;
-    // console.log(id); // 1
-    // console.log(nome); // Admin
-    // console.log(Adm); // 1
-    // console.log(modalData);
     const handleAction = (actionType) => {
         // Faça a solicitação ao endpoint da 
         axios.post('https://hospitalemcor.com.br/claviscord/api/index.php?table=registros', {

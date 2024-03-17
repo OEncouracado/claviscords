@@ -55,5 +55,6 @@
     "path": "path-browserify",
     "os": "os-browserify/browser",
     "crypto": "crypto-browserify"
-  }
+  },
+  "packageManager": "yarn@4.0.2"
 }
