@@ -33,18 +33,18 @@ function CenteredModal({ show, handleClose, modalData, setShouldUpdate }) {
         }
       };
 
-    useEffect(() => {
+      useEffect(() => {
         if (modalData && !modalData.chaveOn) {
-            axios.get(`https://hospitalemcor.com.br/claviscord/api/index.php?table=registros&tipo=retirada`)
+            axios.get(`https://hospitalemcor.com.br/claviscord/api/index.php?table=registros&id_chave=${modalData.id}&tipo=retirada`)
                 .then(response => {
                     try {
-                        // Descriptografa os dados
                         const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
                         
                         if (decryptedData && decryptedData.length > 0) {
+                            // Pega o último registro (último elemento do array)
                             const registro = decryptedData[decryptedData.length - 1];
                             setUltimoRegistro(registro);
-                            
+
                             const dataRegistro = new Date(registro.data_registro);
                             const agora = new Date();
                             const diffMs = agora - dataRegistro;
@@ -63,7 +63,7 @@ function CenteredModal({ show, handleClose, modalData, setShouldUpdate }) {
                     console.error('Erro ao buscar último registro:', error);
                 });
         }
-    }, [modalData]);
+    }, [modalData,show]);
     const handleAction = (actionType) => {
         // Faça a solicitação ao endpoint da 
         axios.post('https://hospitalemcor.com.br/claviscord/api/index.php?table=registros', {
@@ -95,33 +95,6 @@ function CenteredModal({ show, handleClose, modalData, setShouldUpdate }) {
         setNomePessoa('');
         handleClose();
     };
-
-    useEffect(() => {
-        if (modalData && !modalData.chaveOn) {
-            // Buscar o último registro quando a chave estiver retirada
-            axios.get(`https://hospitalemcor.com.br/claviscord/api/index.php?table=registros&id_chave=${modalData.id}&tipo=retirada&order=desc`)
-                .then(response => {
-                    if (response.data && response.data.length > 0) {
-                        const registro = response.data[0];
-                        setUltimoRegistro(registro);
-
-                        // Calcular tempo decorrido
-                        const dataRegistro = new Date(registro.data_registro);
-                        const agora = new Date();
-                        const diffMs = agora - dataRegistro;
-                        
-                        const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                        const horas = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                        const minutos = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-                        setTempoDecorrido(`${dias} dias, ${horas} horas, ${minutos} minutos`);
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro ao buscar último registro:', error);
-                });
-        }
-    }, [modalData]);
 
   return (
     modalData.chaveOn ?
