@@ -6,6 +6,7 @@ import axios from 'axios';
 import { BsSearch } from 'react-icons/bs';
 import "../../index.css"
 import CenteredModal from './Modal';
+import ModalAdd from './ModalAdd';
 
 
 function Claviculario() {
@@ -14,6 +15,7 @@ function Claviculario() {
   const [chaves, setChaves] = useState([]);
   const [searchTerm, setSearchTerm] = useState(''); // Estado para armazenar o valor da caixa de pesquisa
   const [show, setShow] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
   const [modalData, setModalData] = useState([]);
   const [shouldUpdate, setShouldUpdate] = useState(false);
 
@@ -80,8 +82,11 @@ function Claviculario() {
 
   const renderChaves = () => {
     return currentChaves.map(chave => (
-      
-        <div onClick={() => handleShow(chave)} className="framechave d-flex flex-column align-items-center border p-1 m-1 ">
+        <div 
+          key={chave.id}  // Add a unique key here
+          onClick={() => handleShow(chave)} 
+          className="framechave d-flex flex-column align-items-center border p-1 m-1 "
+        >
           <p className='m-0'>{chave.numero}</p>
           <img
             className={chave.chaveOn ? 'chavetamanho' : 'chavetamanhosem'}
@@ -90,7 +95,7 @@ function Claviculario() {
           />
           <p className='nomeChave m-0'>{chave.nome}</p>
         </div>
-           ));
+    ));
   };
 
   const handleClose = () => {
@@ -101,6 +106,13 @@ function Claviculario() {
   const handleShow = (chave) => {
     setShow(true);
     setModalData(chave);
+  }
+
+  const modalAddShow = () => {
+    setShowAdd(true)
+  }
+  const modalAddClose = () => {
+    setShowAdd(false)
   }
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -116,8 +128,8 @@ function Claviculario() {
 
   return (<>
     <div className="pai d-flex flex-column justify-content-center align-items-center" >
-       <div className="position-relative w-auto searchboxitems rounded">
-          <InputGroup.Text>
+       <div className=" position-relative d-flex justify-content-evenly align-items-center w-100 searchboxitems rounded">
+          <InputGroup.Text className='w-75'>
             <Form.Control
               type="search"
               placeholder="Digite para pesquisar..."
@@ -128,6 +140,11 @@ function Claviculario() {
             />
             <BsSearch />
           </InputGroup.Text>
+          <i 
+          className="fas fa-plus-circle ms-3"
+          style={{cursor:"pointer"}}
+          color={showAdd ? "dark" : "light"}
+          onClick={()=> modalAddShow()}/>
         </div>
         
       <div className="d-flex flex-wrap">
@@ -139,6 +156,7 @@ function Claviculario() {
     </div>
     
     <CenteredModal show={show} handleClose={handleClose} modalData={modalData} setShouldUpdate={setShouldUpdate}/>
+    <ModalAdd show={showAdd} handleClose={modalAddClose} setShouldUpdate={setShouldUpdate} />
     </>
   );
 

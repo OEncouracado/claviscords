@@ -6,7 +6,6 @@ import Login from './components/home/login';
 function App() {
 
   const isToken = localStorage.getItem('token');
-  console.log(isToken)
   return (<>
   
   {isToken ? <Appx/>: <Login/>}

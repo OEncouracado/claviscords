@@ -35,14 +35,16 @@ function CenteredModal({ show, handleClose, modalData, setShouldUpdate }) {
 
       useEffect(() => {
         if (modalData && !modalData.chaveOn) {
-            axios.get(`https://hospitalemcor.com.br/claviscord/api/index.php?table=registros&id_chave=${modalData.id}&tipo=retirada`)
+            axios.get(`https://hospitalemcor.com.br/claviscord/api/index.php?table=registros&tipo=retirada`)
                 .then(response => {
                     try {
                         const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
-                        
                         if (decryptedData && decryptedData.length > 0) {
                             // Pega o último registro (último elemento do array)
-                            const registro = decryptedData[decryptedData.length - 1];
+                            const retiradas = decryptedData.filter(item => item.tipo === "retirada");
+                            const registrosChave = retiradas.filter(item => item.id_chave === modalData.id);
+                            // const registro = decryptedData[decryptedData.length - 1];
+                            const registro = registrosChave[registrosChave.length - 1];
                             setUltimoRegistro(registro);
 
                             const dataRegistro = new Date(registro.data_registro);

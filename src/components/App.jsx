@@ -4,6 +4,7 @@ import Claviculario from '../components/home';
 import logo from "../images/logo.png";
 import "../App.css"
 import Registros from './home/registros';
+import Config from './home/Config';
 
 function Appx() {
   const [show, setShow] = useState(false)
@@ -43,9 +44,7 @@ function Appx() {
             </Tab>
             <Tab eventKey="config" title="Configurações">
             <Container className="p-0 d-flex justify-content-center" >
-                    <div className="pai" style={{height:"40rem"}}>
-                        Configurações
-                    </div>
+                      <Config />
                 </Container>
             </Tab>
           </Tabs>
