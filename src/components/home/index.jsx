@@ -17,6 +17,7 @@ function Claviculario({ shouldUpdate, setShouldUpdate }) {
   const [show, setShow] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [modalData, setModalData] = useState([]);
+  
 
 
   useEffect(() => {

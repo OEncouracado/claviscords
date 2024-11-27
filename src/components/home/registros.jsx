@@ -176,6 +176,28 @@ function Registros(props) {
       return null;
     }
   };
+  console.log('props.shouldUpdate :>> ', props.shouldUpdate);
+  useEffect(() => {
+    // Apenas recarregar os dados se shouldUpdate for true
+    if (props.shouldUpdate) {
+      const fetchData = async () => {
+        try {
+          const response = await axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=registros");
+          const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
+          if (decryptedData && Array.isArray(decryptedData)) {
+            setListaRetiradas(decryptedData.filter(registro => registro.tipo === "retirada"));
+            setListaDevolucoes(decryptedData.filter(registro => registro.tipo === "devolucao"));
+            console.log('object');
+          }
+        } catch (error) {
+          console.error('Erro ao obter os dados:', error);
+        }
+      };
+      fetchData();
+       // Chama a função de atualização
+    }
+  }, [props]); // Recarregar quando shouldUpdate mudar
+
   useEffect(() => {
     axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=registros")
     .then(response => {
@@ -194,7 +216,8 @@ function Registros(props) {
     .catch(error => {
       console.error('Erro ao obter as chaves:', error);
     });
-  }, [props.shouldUpdate,listaRetiradas,listaDevolucoes]);
+  }, []);
+
 
   if (props.tipo === 'retirada') {
     return (

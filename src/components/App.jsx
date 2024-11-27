@@ -12,7 +12,13 @@ function Appx() {
   // Função para alterar o estado de shouldUpdate
   const updateShouldUpdate = (value) => {
     setShouldUpdate(value);
+    invertShouldUpdate();
   };
+  const invertShouldUpdate = () => {
+    setShouldUpdate(!shouldUpdate)
+  };
+
+  console.log('shouldUpdate :>> ', shouldUpdate);
   const handleClose = () => {
     localStorage.removeItem('token');
     setShow(false);
@@ -39,12 +45,12 @@ function Appx() {
             </Tab>
             <Tab eventKey="retir" title="Retiradas">
                 <Container className="p-0 d-flex justify-content-center" >
-                      <Registros tipo={'retirada'} shouldUpdate={shouldUpdate}/>
+                      <Registros tipo={'retirada'} shouldUpdate={shouldUpdate} setShouldUpdate={updateShouldUpdate}/>
                 </Container>
             </Tab>
             <Tab eventKey="devol" title="Devoluções">
             <Container className="p-0 d-flex justify-content-center" >
-                      <Registros tipo={'devolucao'} shouldUpdate={shouldUpdate}/>
+                      <Registros tipo={'devolucao'} shouldUpdate={shouldUpdate} setShouldUpdate={updateShouldUpdate}/>
                 </Container>
             </Tab>
             <Tab eventKey="config" title="Configurações">
