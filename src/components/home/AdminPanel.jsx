@@ -19,7 +19,7 @@ import {
   Switch
 } from '@mui/material';
 import axios from 'axios';
-import { CryptoJS } from 'crypto-js';
+import  CryptoJS  from 'crypto-js';
 
 function AdminUserManagement() {
   const [users, setUsers] = useState([]);
@@ -40,18 +40,24 @@ function AdminUserManagement() {
   const decryptAES = (encryptedData, password) => {
     try {
       const iv = CryptoJS.enc.Hex.parse(encryptedData.iv);
-      const encryptedBytes = CryptoJS.enc.Base64.parse(encryptedData.data); // Modificação aqui
-        console.log('encryptedBytes :>> ', encryptedBytes);
-      const decryptedBytes = CryptoJS.AES.decrypt(
-          { ciphertext: encryptedBytes },
-          CryptoJS.enc.Utf8.parse(password),
-          { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
+      const ciphertext = CryptoJS.enc.Base64.parse(encryptedData.data);
+      const key = CryptoJS.enc.Utf8.parse(password);
+  
+      const decrypted = CryptoJS.AES.decrypt(
+        { ciphertext: ciphertext },
+        key,
+        { 
+          iv: iv, 
+          mode: CryptoJS.mode.CBC, 
+          padding: CryptoJS.pad.Pkcs7 
+        }
       );
-
-      const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
-      return JSON.parse(decryptedText); // Modificação aqui
+      
+      const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
+      return JSON.parse(decryptedText);
     } catch (error) {
-      console.error('Erro ao descriptografar:', error);
+      console.error('Decryption Error:', error);
+      console.error('Encrypted Data:', encryptedData);
       return null;
     }
   };
@@ -63,9 +69,8 @@ function AdminUserManagement() {
         try {
           // Descriptografa os dados
           const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
-          console.log(response.data.data);
           // const decryptedData = decryptAES(response.data, process.env.REACT_APP_API_KEY);
-          if (decryptedData && Array.isArray(decryptedData)) {
+          if (decryptedData) {
             // Se decryptedData for um array, você pode configurar as chaves no estado
             setUsers(decryptedData);
           } else {
@@ -103,37 +108,39 @@ function AdminUserManagement() {
   };
 
   // Salvar usuário (novo ou editado)
-  const handleSaveUser = async () => {
-    try {
-      const endpoint = isEditing 
-        ? `https://hospitalemcor.com.br/claviscord/api/index.php?method=PUT&table=usuarios&id=${currentUser.id}`
-        : 'https://hospitalemcor.com.br/claviscord/api/index.php?table=usuarios';
-      
-      const payload = {
-        ...currentUser,
-        // Incluir apenas senha se for preenchida
-        ...(currentUser.senha ? { senha: currentUser.senha } : {})
-      };
-
-      await axios.post(endpoint, payload);
-
-      setSnackbar({
-        open: true,
-        message: isEditing ? 'Usuário atualizado' : 'Usuário criado',
-        severity: 'success'
+  const handleSaveUser = () => { 
+    // Construa o objeto com a conversão explícita
+    const userData = {
+      adm: currentUser.adm ? 1 : 0, // Conversão explícita para número
+      nome: currentUser.nome,
+      senha: currentUser.senha,
+    };
+  
+    console.log('Dados enviados:', userData);
+  
+    axios.post('https://hospitalemcor.com.br/claviscord/api/index.php?table=usuarios', userData)
+      .then(response => {
+        console.info('Resposta do servidor:', response);
+  
+        setSnackbar({
+          open: true,
+          message: isEditing ? 'Usuário atualizado' : 'Usuário criado',
+          severity: 'success'
+        });
+  
+        setOpenDialog(false);
+      })
+      .catch(error => {
+        const errorMensage = decryptAES(error.response.data, '0123456789ABCDEF0123456789ABCDEF');
+        console.error('Erro ao salvar usuário:', errorMensage);
+        setSnackbar({
+          open: true,
+          message: `Erro ao salvar usuário: ${error.response?.data?.message || 'Erro desconhecido'}`,
+          severity: 'error'
+        });
       });
-
-     // Recarregar lista de usuários
-      setOpenDialog(false);
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: 'Erro ao salvar usuário',
-        severity: 'error'
-      });
-    }
   };
-
+  
   // Deletar usuário
   const handleDeleteUser = async (userId) => {
     try {
