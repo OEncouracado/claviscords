@@ -9,7 +9,7 @@ import CenteredModal from './Modal';
 import ModalAdd from './ModalAdd';
 
 
-function Claviculario() {
+function Claviculario({ shouldUpdate, setShouldUpdate }) {
   const [currentPage, setCurrentPage] = useState(1);
   const chavesPerPage = 10;
   const [chaves, setChaves] = useState([]);
@@ -17,7 +17,6 @@ function Claviculario() {
   const [show, setShow] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [modalData, setModalData] = useState([]);
-  const [shouldUpdate, setShouldUpdate] = useState(false);
 
 
   useEffect(() => {

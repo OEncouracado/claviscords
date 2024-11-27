@@ -8,6 +8,11 @@ import Config from './home/Config';
 
 function Appx() {
   const [show, setShow] = useState(false)
+  const [shouldUpdate, setShouldUpdate] = useState(false);
+  // Função para alterar o estado de shouldUpdate
+  const updateShouldUpdate = (value) => {
+    setShouldUpdate(value);
+  };
   const handleClose = () => {
     localStorage.removeItem('token');
     setShow(false);
@@ -28,18 +33,18 @@ function Appx() {
           >
             <Tab eventKey="home" title="Claviculário" >
                 <Container className="p-0 d-flex justify-content-center" >
-                    <Claviculario/>
+                    <Claviculario shouldUpdate={shouldUpdate} setShouldUpdate={updateShouldUpdate}/>
                 </Container>
 
             </Tab>
             <Tab eventKey="retir" title="Retiradas">
                 <Container className="p-0 d-flex justify-content-center" >
-                      <Registros tipo={'retirada'}/>
+                      <Registros tipo={'retirada'} shouldUpdate={shouldUpdate}/>
                 </Container>
             </Tab>
             <Tab eventKey="devol" title="Devoluções">
             <Container className="p-0 d-flex justify-content-center" >
-                      <Registros tipo={'devolucao'}/>
+                      <Registros tipo={'devolucao'} shouldUpdate={shouldUpdate}/>
                 </Container>
             </Tab>
             <Tab eventKey="config" title="Configurações">

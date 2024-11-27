@@ -5,6 +5,8 @@ import CryptoJS from 'crypto-js';
 import { Pagination, Table } from "react-bootstrap";
 import "./index.css"
 
+
+
 function Registros(props) {
   const [listaRetiradas, setListaRetiradas] = useState([]);
   const [listaDevolucoes, setListaDevolucoes] = useState([]);
@@ -174,7 +176,6 @@ function Registros(props) {
       return null;
     }
   };
-
   useEffect(() => {
     axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=registros")
     .then(response => {
@@ -193,7 +194,7 @@ function Registros(props) {
     .catch(error => {
       console.error('Erro ao obter as chaves:', error);
     });
-  }, []);
+  }, [props.shouldUpdate,listaRetiradas,listaDevolucoes]);
 
   if (props.tipo === 'retirada') {
     return (
