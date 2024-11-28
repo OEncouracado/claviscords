@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import chaveImag from "../../images/chave.webp";
+import chaveImag from "../../images/chave.webp";// eslint-disable-next-line
 import { Form, InputGroup, Pagination,} from 'react-bootstrap';
 import CryptoJS from 'crypto-js';
-import axios from 'axios';
+import axios from 'axios';// eslint-disable-next-line
 import { BsSearch } from 'react-icons/bs';
 import "../../index.css"
 import CenteredModal from './Modal';
@@ -139,7 +139,7 @@ function Claviculario({ shouldUpdate, setShouldUpdate }) {
             name="searchField"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)} // Atualiza o estado com o valor digitado
-            onKeyPress={handleSearchKeyPress}
+            onKeyDown={handleSearchKeyPress}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -147,6 +147,7 @@ function Claviculario({ shouldUpdate, setShouldUpdate }) {
                 </InputAdornment>
               ),
             }}
+            autoComplete='off'
             fullWidth // Opcional: Ajusta o campo para ocupar todo o espaço disponível
           />
         </div>
