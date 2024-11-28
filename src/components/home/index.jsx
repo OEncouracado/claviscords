@@ -7,6 +7,7 @@ import { BsSearch } from 'react-icons/bs';
 import "../../index.css"
 import CenteredModal from './Modal';
 import ModalAdd from './ModalAdd';
+import { Search } from '@mui/icons-material';
 import { InputAdornment, TextField } from '@mui/material';
 
 
@@ -130,22 +131,26 @@ function Claviculario({ shouldUpdate, setShouldUpdate }) {
   return (<>
     <div className="pai d-flex flex-column justify-content-center align-items-center" >
        <div className=" position-relative d-flex justify-content-evenly align-items-center w-100 searchboxitems rounded">
-       {/* <TextField
-      variant="outlined"
-      placeholder="Digite para pesquisar..."
-      value={searchTerm}
-      onChange={(event) => setSearchTerm(event.target.value)} // Atualiza o estado com o valor digitado
-      onKeyPress={handleSearchKeyPress}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <Search />
-          </InputAdornment>
-        ),
-      }}
-      fullWidth // Opcional: Ajusta o campo para ocupar todo o espaço disponível
-    /> */}
-          <InputGroup.Text className='w-75'>
+       <div className='w-75'>
+          <TextField
+            className="bg-light"
+            variant="filled"
+            placeholder="Digite para pesquisar..."
+            name="searchField"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)} // Atualiza o estado com o valor digitado
+            onKeyPress={handleSearchKeyPress}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+            fullWidth // Opcional: Ajusta o campo para ocupar todo o espaço disponível
+          />
+        </div>
+          {/* <InputGroup.Text className='w-75'>
             <Form.Control
               type="search"
               placeholder="Digite para pesquisar..."
@@ -155,7 +160,7 @@ function Claviculario({ shouldUpdate, setShouldUpdate }) {
               onChange={(event) => setSearchTerm(event.target.value)} // Atualiza o estado com o valor digitado na caixa de pesquisa
             />
             <BsSearch />
-          </InputGroup.Text>
+          </InputGroup.Text> */}
           <i 
           className="fas fa-plus-circle ms-3"
           style={{cursor:"pointer"}}
