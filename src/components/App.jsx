@@ -9,16 +9,30 @@ import Config from './home/Config';
 function Appx() {
   const [show, setShow] = useState(false)
   const [shouldUpdate, setShouldUpdate] = useState(false);
+
   // Função para alterar o estado de shouldUpdate
   const updateShouldUpdate = (value) => {
-    setShouldUpdate(value);
-    invertShouldUpdate();
+    if (shouldUpdate) {
+      // Se shouldUpdate está true, muda para false e depois para o novo valor
+      setShouldUpdate(false);
+      setTimeout(() => {
+        setShouldUpdate(value);
+        // resetToFalse(); // Reseta para false após alguns segundos
+      }, 0); // 0 ms para garantir a atualização na próxima renderização
+    } else {
+      // Se está false, atualiza direto e reseta após alguns segundos
+      setShouldUpdate(value);
+      // resetToFalse();
+    }
   };
-  const invertShouldUpdate = () => {
-    setShouldUpdate(!shouldUpdate)
-  };
+  
+  // Função para voltar shouldUpdate para false após 2 segundos
+  // const resetToFalse = () => {
+  //   setTimeout(() => {
+  //     setShouldUpdate(false);
+  //   }, 5000); // Tempo em milissegundos
+  // };
 
-  console.log('shouldUpdate :>> ', shouldUpdate);
   const handleClose = () => {
     localStorage.removeItem('token');
     setShow(false);

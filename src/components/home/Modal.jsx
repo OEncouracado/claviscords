@@ -91,7 +91,9 @@ function CenteredModal({ show, handleClose, modalData, setShouldUpdate }) {
                     console.info(response);
                     
                 })
-                .catch(error => {});  
+                .catch(error => {
+                    console.error('Erro ao processar os dados:', error);
+                });  
         // Fechar a modal
         setShouldUpdate(true);
         setNomePessoa('');

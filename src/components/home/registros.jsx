@@ -7,7 +7,7 @@ import "./index.css"
 
 
 
-function Registros(props) {
+function Registros({tipo,shouldUpdate,setShouldUpdate}) {
   const [listaRetiradas, setListaRetiradas] = useState([]);
   const [listaDevolucoes, setListaDevolucoes] = useState([]);
   const [itensPerPage, setItensPerPage] = useState(10);
@@ -176,10 +176,9 @@ function Registros(props) {
       return null;
     }
   };
-  console.log('props.shouldUpdate :>> ', props.shouldUpdate);
   useEffect(() => {
     // Apenas recarregar os dados se shouldUpdate for true
-    if (props.shouldUpdate) {
+    if (shouldUpdate) {
       const fetchData = async () => {
         try {
           const response = await axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=registros");
@@ -187,7 +186,6 @@ function Registros(props) {
           if (decryptedData && Array.isArray(decryptedData)) {
             setListaRetiradas(decryptedData.filter(registro => registro.tipo === "retirada"));
             setListaDevolucoes(decryptedData.filter(registro => registro.tipo === "devolucao"));
-            console.log('object');
           }
         } catch (error) {
           console.error('Erro ao obter os dados:', error);
@@ -196,7 +194,7 @@ function Registros(props) {
       fetchData();
        // Chama a função de atualização
     }
-  }, [props]); // Recarregar quando shouldUpdate mudar
+  }, [shouldUpdate,setListaRetiradas,setListaDevolucoes,setShouldUpdate]); // Recarregar quando shouldUpdate mudar
 
   useEffect(() => {
     axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=registros")
@@ -219,7 +217,7 @@ function Registros(props) {
   }, []);
 
 
-  if (props.tipo === 'retirada') {
+  if (tipo === 'retirada') {
     return (
       <div className="pai d-flex flex-column justify-content-center align-items-center">
         <div className="lista">
@@ -265,7 +263,7 @@ function Registros(props) {
       </div>
     );
   }
-  else if (props.tipo === 'devolucao') {
+  else if (tipo === 'devolucao') {
     return (
       <div className="pai d-flex flex-column justify-content-center align-items-center">
         <div className="lista">
