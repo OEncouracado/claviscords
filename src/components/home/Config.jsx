@@ -1,4 +1,4 @@
-import { Button, FormControl, FormGroup, IconButton, InputAdornment, InputLabel, OutlinedInput, TextField, Snackbar, Alert } from '@mui/material'
+import { Button, FormControl, FormGroup, IconButton, InputAdornment, InputLabel, OutlinedInput, TextField, Snackbar, Alert, Box } from '@mui/material'
 import React, { useState } from 'react'
 import axios from 'axios'
 import AdminUserManagement from './AdminPanel';
@@ -139,17 +139,30 @@ function Config() {
 
         {/* Seção de administração visível apenas para ADM */}
         {usuario.Adm === 1 && (
-          <div className="mt-4 w-100 text-dark">
-            <h6>Opções de Administração</h6>
-            <TextField 
-              fullWidth 
-              label="Gerenciar Usuários" 
-              variant="outlined" 
-              className="mt-2"
-              disabled
-            />
+          <Box 
+          sx={{
+            mt: 4,
+            border: 'solid grey 0.1rem',
+            borderRadius: "0.5rem",
+            padding: "0.5rem",
+            paddingTop:"0.7rem",
+            width: '100%',
+            color: 'text.primary' // Substitui "text-dark" e utiliza o tema do MUI
+          }}
+        >
+          <h6 className='bg-primary text-white py-1 rounded'>Opções de Administração</h6>
+            <Box sx={{
+            mt: 4,
+            border: 'solid grey 0.1rem',
+            borderRadius: "0.5rem",
+            padding: "0.5rem",
+            width: '100%',
+            color: 'text.primary' // Substitui "text-dark" e utiliza o tema do MUI
+          }}
+          >
             <AdminUserManagement />
-          </div>
+          </Box>
+        </Box>
         )}
 
         {/* Componente Snackbar para feedback */}

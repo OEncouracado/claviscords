@@ -169,7 +169,7 @@ function Claviculario({ shouldUpdate, setShouldUpdate }) {
           onClick={()=> modalAddShow()}/>
         </div>
         
-      <div className="d-flex flex-wrap">
+      <div className="d-flex flex-wrap justify-content-center">
         {renderChaves()}
       </div>
       <Pagination className="mt-1">

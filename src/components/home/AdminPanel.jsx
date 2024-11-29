@@ -111,6 +111,7 @@ function AdminUserManagement() {
   const handleSaveUser = () => { 
     // Construa o objeto com a conversão explícita
     const userData = {
+      ...(isEditing ? { id: currentUser.id } : {}), // Adiciona ID apenas quando estiver editando
       adm: currentUser.adm ? 1 : 0, // Conversão explícita para número
       nome: currentUser.nome,
       senha: currentUser.senha,
@@ -128,14 +129,23 @@ function AdminUserManagement() {
           severity: 'success'
         });
   
+        // Recarregar lista de usuários após criar/editar
+        axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=usuarios")
+          .then(response => {
+            const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
+            if (decryptedData) {
+              setUsers(decryptedData);
+            }
+          });
+  
         setOpenDialog(false);
       })
       .catch(error => {
-        const errorMensage = decryptAES(error.response.data, '0123456789ABCDEF0123456789ABCDEF');
-        console.error('Erro ao salvar usuário:', errorMensage);
+        const errorMessage = decryptAES(error.response.data, '0123456789ABCDEF0123456789ABCDEF');
+        console.error('Erro ao salvar usuário:', errorMessage);
         setSnackbar({
           open: true,
-          message: `Erro ao salvar usuário: ${error.response?.data?.message || 'Erro desconhecido'}`,
+          message: errorMessage?.message || 'Erro ao salvar usuário',
           severity: 'error'
         });
       });
@@ -147,7 +157,13 @@ function AdminUserManagement() {
       await axios.delete(
         `https://hospitalemcor.com.br/claviscord/api/index.php?table=usuarios&id=${userId}`
       );
-
+      axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=usuarios")
+          .then(response => {
+            const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
+            if (decryptedData) {
+              setUsers(decryptedData);
+            }
+          });
       setSnackbar({
         open: true,
         message: 'Usuário deletado',
@@ -165,7 +181,7 @@ function AdminUserManagement() {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 pt-2">
       <h4>Gerenciamento de Usuários</h4>
       
       <Button 
