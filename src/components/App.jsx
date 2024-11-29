@@ -5,10 +5,12 @@ import logo from "../images/logo.png";
 import "../App.css"
 import Registros from './home/registros';
 import Config from './home/Config';
+import {AdminChavesManagement, AdminUserManagement} from './home/AdminPanel';
 
 function Appx() {
   const [show, setShow] = useState(false)
   const [shouldUpdate, setShouldUpdate] = useState(false);
+  const token = JSON.parse(localStorage.getItem('token'));
 
   // Função para alterar o estado de shouldUpdate
   const updateShouldUpdate = (value) => {
@@ -72,6 +74,12 @@ function Appx() {
                       <Config />
                 </Container>
             </Tab>
+            {token?.Adm === 1 ? <Tab eventKey="admPainel" title="Administração">
+            <Container className="p-0 py-2 d-flex justify-content-center" >
+                      <AdminUserManagement />
+                      <AdminChavesManagement shouldUpdate={shouldUpdate} setShouldUpdate={updateShouldUpdate}/>
+                </Container>
+            </Tab>:""}
           </Tabs>
         </Container>
         <p className='desenvpor' >Desenvolvido por: <a href="https://mavsleo.com.br" target="_blank" rel="noopener noreferrer">MAVsLEO &copy; </a>• 2016 </p>

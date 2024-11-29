@@ -17,6 +17,8 @@
     "crypto-browserify": "^3.12.0",
     "crypto-js": "^4.1.1",
     "dotenv": "^16.3.1",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.2",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "react": "^18.2.0",

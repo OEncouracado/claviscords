@@ -20,6 +20,212 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import  CryptoJS  from 'crypto-js';
+import { Pagination } from 'react-bootstrap';
+
+function AdminChavesManagement({shouldUpdate}) {
+  const [chaves, setChaves] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const chavesPerPage = 10;
+  const [openDialog,setOpenDialog] = useState(false);
+  const [currentChave, setCurrentChave] = useState({
+    nome: '', 
+    numero: '',
+  });
+
+  // Função para descriptografar dados
+  const decryptAES = (encryptedData, password) => {
+    try {
+      const iv = CryptoJS.enc.Hex.parse(encryptedData.iv);
+      const ciphertext = CryptoJS.enc.Base64.parse(encryptedData.data);
+      const key = CryptoJS.enc.Utf8.parse(password);
+  
+      const decrypted = CryptoJS.AES.decrypt(
+        { ciphertext: ciphertext },
+        key,
+        { 
+          iv: iv, 
+          mode: CryptoJS.mode.CBC, 
+          padding: CryptoJS.pad.Pkcs7 
+        }
+      );
+      
+      const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
+      return JSON.parse(decryptedText);
+    } catch (error) {
+      console.error('Decryption Error:', error);
+      console.error('Encrypted Data:', encryptedData);
+      return null;
+    }}
+
+
+    const indexOfLastChave = currentPage * chavesPerPage;
+    const indexOfFirstChave = indexOfLastChave - chavesPerPage;
+    const currentChaves = chaves.slice(indexOfFirstChave, indexOfLastChave);
+
+  // Buscar Chaves
+  useEffect(() => {
+    axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves")
+      .then(response => {
+        try {
+          // Descriptografa os dados
+          const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
+          // const decryptedData = decryptAES(response.data, process.env.REACT_APP_API_KEY);
+          if (decryptedData) {
+            // Se decryptedData for um array, você pode configurar as chaves no estado
+            setChaves(decryptedData);
+          } else {
+            console.error('Erro ao descriptografar os dados ou os dados não são um array.');
+          }
+        } catch (error) {
+          console.error('Erro ao processar os dados:', error);
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao obter as chaves:', error);
+      });}
+  , [shouldUpdate]);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const pageNumbers = [];
+  for (let i = 1; i <= Math.ceil(chaves.length / chavesPerPage); i++) {
+    pageNumbers.push(
+      <Pagination.Item key={i} active={i === currentPage} onClick={() => paginate(i)}>
+        {i}
+      </Pagination.Item>
+    );
+  }
+
+   // Abrir diálogo para editar usuário
+   const handleEditChave = (chave) => {
+    setCurrentChave({
+      ...chave,
+      senha: '' // Limpar senha por segurança
+    });
+    setOpenDialog(true);
+  };
+  const handleDeleteChave = async (chaveID) => {
+    try {
+      await axios.delete(
+        `https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves&id=${chaveID}`
+      );
+      axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves")
+          .then(response => {
+            const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
+            if (decryptedData) {
+              setChaves(decryptedData);
+            }
+          });
+      // setSnackbar({
+      //   open: true,
+      //   message: 'Usuário deletado',
+      //   severity: 'success'
+      // });
+
+     // Recarregar lista de usuários
+    } catch(error) {
+      const errorMessage = decryptAES(error.response.data, '0123456789ABCDEF0123456789ABCDEF');
+      console.error('Erro ao salvar usuário:', errorMessage);
+      // setSnackbar({
+      //   open: true,
+      //   message: errorMessage?.message || 'Erro ao salvar usuário',
+      //   severity: 'error'
+      // });
+    };
+  
+  };
+
+    return(
+      <div className="mx-2 p-4 pt-2 border rounded">
+        <h4>Gerenciamento de Chaves</h4>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+                <TableCell>Nome</TableCell>
+                <TableCell>Número</TableCell>
+                <TableCell>Estado</TableCell>
+                <TableCell>Ações</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {currentChaves.map((chave) => (
+                <TableRow key={chave.id}>
+                  <TableCell>{chave.id}</TableCell>
+                  <TableCell>{chave.nome}</TableCell>
+                  <TableCell>{chave.numero}</TableCell>
+                  <TableCell>
+                    <Switch 
+                      checked={chave.chaveOn === 0}
+                      title={chave.chaveOn === 0 ? "Chave Retirada":"Chave Disponível"}
+                      color="secondary" 
+                      disabled
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <IconButton 
+                      color="primary" 
+                      onClick={() => {handleEditChave(chave)}}
+                    >
+                      <i class="fas fa-pencil-alt    "></i>
+                    </IconButton>
+                    <IconButton 
+                      color="secondary" 
+                      onClick={() => {handleDeleteChave(chave.id)}}
+                    >
+                      <i class="fas fa-trash    "></i>
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+              
+            </TableBody>
+          </Table>
+         
+        </TableContainer>
+        <Pagination className="mt-1">
+        {pageNumbers}
+      </Pagination>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>
+          Editar Chave
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Nome"
+            fullWidth
+            value={currentChave.nome}
+            onChange={(e) => setCurrentChave({
+              ...currentChave, 
+              nome: e.target.value
+            })}
+          />
+          <TextField
+            margin="dense"
+            label="Número"
+            type="number"
+            fullWidth
+            value={currentChave.numero}
+            onChange={(e) => setCurrentChave({
+              ...currentChave, 
+              numero: e.target.value
+            })}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Cancelar</Button>
+          <Button  color="primary">
+            Salvar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      </div>
+      
+    );
+};
 
 function AdminUserManagement() {
   const [users, setUsers] = useState([]);
@@ -117,8 +323,6 @@ function AdminUserManagement() {
       senha: currentUser.senha,
     };
   
-    console.log('Dados enviados:', userData);
-  
     axios.post('https://hospitalemcor.com.br/claviscord/api/index.php?table=usuarios', userData)
       .then(response => {
         console.info('Resposta do servidor:', response);
@@ -181,7 +385,7 @@ function AdminUserManagement() {
   };
 
   return (
-    <div className="p-4 pt-2">
+    <div className="p-4 pt-2 border rounded">
       <h4>Gerenciamento de Usuários</h4>
       
       <Button 
@@ -298,4 +502,4 @@ function AdminUserManagement() {
   );
 }
 
-export default AdminUserManagement;
+export {AdminUserManagement, AdminChavesManagement}

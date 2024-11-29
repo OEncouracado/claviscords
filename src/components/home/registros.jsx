@@ -2,10 +2,9 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
 import CryptoJS from 'crypto-js';
-import { Pagination, Table } from "react-bootstrap";
+import { Pagination, Table, Button } from "react-bootstrap";
+import jsPDF from 'jspdf';
 import "./index.css"
-
-
 
 function Registros({tipo,shouldUpdate,setShouldUpdate}) {
   const [listaRetiradas, setListaRetiradas] = useState([]);
@@ -20,6 +19,110 @@ function Registros({tipo,shouldUpdate,setShouldUpdate}) {
   const [filtroChave, setFiltroChave] = useState('');
   const [filtroNome, setFiltroNome] = useState('');
   const [ordemData, setOrdemData] = useState('recente');
+
+  // Função para exportar PDF
+  const exportToPDF = () => {
+    // Determinar os dados e título corretos com base no tipo
+    const usuario = JSON.parse(localStorage.getItem('token'));
+    const dadosFiltrados = tipo === 'retirada' ? dadosFiltradosRetiradas : dadosFiltradosDevolucoes;
+    const title = tipo === 'retirada' 
+      ? 'Relatório de Retiradas' 
+      : 'Relatório de Devoluções';
+
+    // Criar novo documento PDF
+    const doc = new jsPDF({
+      orientation: 'p',
+      unit: 'pt',
+      format: 'a4'
+    });
+
+    // Configurações de estilo para o PDF
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 40;
+    const fontSize = 10;
+    const lineHeight = 20;
+    const tableTop = 100;
+
+    // Adicionar título
+    doc.setFontSize(16);
+    doc.text(title, margin, 60, { align: 'left' });
+    
+    // Adicionar data do relatório
+    doc.setFontSize(10);
+    doc.text(`Data: ${new Date().toLocaleString()} , Usuário: ${usuario.nome}`, margin, 80, { align: 'left' });
+
+    // Configurar cabeçalho da tabela
+    const headers = ['Chave', 'Solicitante', 'Horário do Registro'];
+    const columnsWidth = [
+      pageWidth * 0.2,   // Chave
+      pageWidth * 0.4,   // Solicitante
+      pageWidth * 0.3    // Horário
+    ];
+
+    // Função para adicionar nova página
+    const addPage = () => {
+      doc.addPage();
+      doc.setFontSize(10);
+      doc.text(title + ' (Continuação)', margin, 60, { align: 'left' });
+      return tableTop;
+    };
+
+    // Renderizar cabeçalho
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    headers.forEach((header, i) => {
+      doc.text(
+        header, 
+        margin + columnsWidth.slice(0, i).reduce((a, b) => a + b, 0), 
+        tableTop
+      );
+    });
+
+    // Renderizar linhas
+    doc.setFontSize(fontSize);
+    doc.setFont(undefined, 'normal');
+    
+    let currentY = tableTop + lineHeight;
+    dadosFiltrados.forEach((item, index) => {
+      // Verificar se precisa de nova página
+      if (currentY > pageHeight - margin) {
+        currentY = addPage() + lineHeight;
+      }
+
+      // Renderizar células
+      const rowData = [
+        item.id_chave.toString(),
+        item.nome_pessoa,
+        item.data_registro
+      ];
+
+      rowData.forEach((text, colIndex) => {
+        doc.text(
+          text, 
+          margin + columnsWidth.slice(0, colIndex).reduce((a, b) => a + b, 0), 
+          currentY
+        );
+      });
+
+      // Adicionar linha horizontal
+      doc.setDrawColor(200);
+      doc.line(margin, currentY + 5, pageWidth - margin, currentY + 5);
+
+      currentY += lineHeight;
+    });
+
+    // Adicionar rodapé com total de registros
+    doc.setFontSize(10);
+    doc.text(`Total de Registros: ${dadosFiltrados.length}`, 
+      margin, 
+      pageHeight - 20, 
+      { align: 'left' }
+    );
+
+    // Salvar PDF
+    doc.save(`${title}_${new Date().toLocaleDateString()}.pdf`);
+  };
 
   const handleItensPerPageChange = (e) => {
     const selectedValue = parseInt(e.target.value, 10);
@@ -176,6 +279,7 @@ function Registros({tipo,shouldUpdate,setShouldUpdate}) {
       return null;
     }
   };
+
   useEffect(() => {
     // Apenas recarregar os dados se shouldUpdate for true
     if (shouldUpdate) {
@@ -192,9 +296,8 @@ function Registros({tipo,shouldUpdate,setShouldUpdate}) {
         }
       };
       fetchData();
-       // Chama a função de atualização
     }
-  }, [shouldUpdate,setListaRetiradas,setListaDevolucoes,setShouldUpdate]); // Recarregar quando shouldUpdate mudar
+  }, [shouldUpdate,setListaRetiradas,setListaDevolucoes,setShouldUpdate]);
 
   useEffect(() => {
     axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=registros")
@@ -216,24 +319,28 @@ function Registros({tipo,shouldUpdate,setShouldUpdate}) {
     });
   }, []);
 
-
   if (tipo === 'retirada') {
     return (
       <div className="pai d-flex flex-column justify-content-center align-items-center">
         <div className="lista">
-          <div className="mb-1">
-            <label className="me-1" htmlFor="itensPerPage">Itens por página:</label>
-            <select 
-              id="itensPerPage" 
-              value={itensPerPage} 
-              onChange={handleItensPerPageChange}
-            >
-              {[...Array(10).keys()].map((value) => (
-                <option key={(value + 1) * 5} value={(value + 1) * 5}>
-                  {(value + 1) * 5}
-                </option>
-              ))}
-            </select>
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <label className="me-1" htmlFor="itensPerPage">Itens por página:</label>
+              <select 
+                id="itensPerPage" 
+                value={itensPerPage} 
+                onChange={handleItensPerPageChange}
+              >
+                {[...Array(10).keys()].map((value) => (
+                  <option key={(value + 1) * 5} value={(value + 1) * 5}>
+                    {(value + 1) * 5}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <Button variant="primary" onClick={exportToPDF}>
+              Exportar PDF
+            </Button>
           </div>
 
           <ComponenteFiltros />
@@ -267,7 +374,8 @@ function Registros({tipo,shouldUpdate,setShouldUpdate}) {
     return (
       <div className="pai d-flex flex-column justify-content-center align-items-center">
         <div className="lista">
-          <div className="mb-1">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+        <div>
             <label className="me-1" htmlFor="itensPerPage">Itens por página:</label>
             <select 
               id="itensPerPage" 
@@ -280,6 +388,10 @@ function Registros({tipo,shouldUpdate,setShouldUpdate}) {
                 </option>
               ))}
             </select>
+            </div>
+            <Button variant="primary" onClick={exportToPDF}>
+              Exportar PDF
+            </Button>
           </div>
 
           <ComponenteFiltros />

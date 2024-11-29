@@ -7,8 +7,7 @@ import  CryptoJS  from 'crypto-js';
 function CenteredModal({ show, handleClose, modalData, setShouldUpdate }) {
     const [nomePessoa, setNomePessoa] = useState('');
     const [ultimoRegistro, setUltimoRegistro] = useState('');
-    const [tempoDecorrido, setTempoDecorrido] = useState('');
-
+    const [tempoDecorrido, setTempoDecorrido] = useState(''); 
     // eslint-disable-next-line
     const [token , setToken] = useState(localStorage.getItem('token'));
     const tokenObj = JSON.parse(token);

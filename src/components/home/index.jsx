@@ -8,7 +8,7 @@ import "../../index.css"
 import CenteredModal from './Modal';
 import ModalAdd from './ModalAdd';
 import { Search } from '@mui/icons-material';
-import { InputAdornment, TextField } from '@mui/material';
+import { Alert, InputAdornment, Snackbar, TextField } from '@mui/material';
 
 
 function Claviculario({ shouldUpdate, setShouldUpdate }) {
@@ -19,7 +19,11 @@ function Claviculario({ shouldUpdate, setShouldUpdate }) {
   const [show, setShow] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [modalData, setModalData] = useState([]);
-  
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
 
 
   useEffect(() => {
@@ -63,13 +67,13 @@ function Claviculario({ shouldUpdate, setShouldUpdate }) {
       return null;
     }
   };
-
+  
   const filteredChaves = chaves.filter((chave) =>
   chave.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
   chave.numero.toString().includes(searchTerm)
 );
 
-
+  
   const handleSearchKeyPress = (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -80,25 +84,24 @@ function Claviculario({ shouldUpdate, setShouldUpdate }) {
   const indexOfFirstChave = indexOfLastChave - chavesPerPage;
   const currentChaves = filteredChaves.slice(indexOfFirstChave, indexOfLastChave);
 
-  
+const renderChaves = () => {
+  const sortedChaves = [...currentChaves].sort((a, b) => a.numero - b.numero);
 
-  const renderChaves = () => {
-    return currentChaves.map(chave => (
+  return sortedChaves.map(chave => (
         <div 
-          key={chave.id}  // Add a unique key here
           onClick={() => handleShow(chave)} 
-          className="framechave d-flex flex-column align-items-center border p-1 m-1 "
+          className="framechave d-flex flex-column align-items-center border p-1 m-1"
         >
-          <p className='m-0'>{chave.numero}</p>
+          <p className="m-0">{chave.numero}</p>
           <img
             className={chave.chaveOn ? 'chavetamanho' : 'chavetamanhosem'}
             src={chaveImag}
             alt={`chave ${chave.id}`}
           />
-          <p className='nomeChave m-0'>{chave.nome}</p>
+          <p className="nomeChave m-0">{chave.nome}</p>
         </div>
-    ));
-  };
+  ));
+};
 
   const handleClose = () => {
     setShow();
@@ -130,6 +133,18 @@ function Claviculario({ shouldUpdate, setShouldUpdate }) {
 
   return (<>
     <div className="pai d-flex flex-column justify-content-center align-items-center" >
+    <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert 
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
        <div className=" position-relative d-flex justify-content-evenly align-items-center w-100 searchboxitems rounded">
        <div className='w-75'>
           <TextField
