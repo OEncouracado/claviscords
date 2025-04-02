@@ -28,8 +28,14 @@ function AdminChavesManagement({shouldUpdate}) {
   const chavesPerPage = 10;
   const [openDialog,setOpenDialog] = useState(false);
   const [currentChave, setCurrentChave] = useState({
+    id: '',
     nome: '', 
     numero: '',
+  });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
   });
 
   // Função para descriptografar dados
@@ -98,11 +104,12 @@ function AdminChavesManagement({shouldUpdate}) {
    // Abrir diálogo para editar usuário
    const handleEditChave = (chave) => {
     setCurrentChave({
-      ...chave,
-      senha: '' // Limpar senha por segurança
+      ...chave
     });
+    console.log('currentChave :>> ', currentChave);
     setOpenDialog(true);
   };
+  //Deletar Chave
   const handleDeleteChave = async (chaveID) => {
     try {
       await axios.delete(
@@ -115,25 +122,67 @@ function AdminChavesManagement({shouldUpdate}) {
               setChaves(decryptedData);
             }
           });
-      // setSnackbar({
-      //   open: true,
-      //   message: 'Usuário deletado',
-      //   severity: 'success'
-      // });
+      setSnackbar({
+        open: true,
+        message: 'Chave deletada',
+        severity: 'success'
+      });
 
-     // Recarregar lista de usuários
     } catch(error) {
       const errorMessage = decryptAES(error.response.data, '0123456789ABCDEF0123456789ABCDEF');
-      console.error('Erro ao salvar usuário:', errorMessage);
-      // setSnackbar({
-      //   open: true,
-      //   message: errorMessage?.message || 'Erro ao salvar usuário',
-      //   severity: 'error'
-      // });
+      console.error('Erro ao Deletar Chave:', errorMessage);
+      setSnackbar({
+        open: true,
+        message: errorMessage?.message || 'Erro ao Deletar Chave',
+        severity: 'error'
+      });
     };
   
   };
-
+  // Salvar chave (novo ou editado)
+  const handleSaveChave = () => {
+    // Construa o objeto com a conversão explícita
+    console.log('currentChaveEnvio :>> ', currentChave);
+    const chaveData = {
+      id: currentChave.id,
+      nome: currentChave.nome,
+      numero: currentChave.numero,
+    };
+  console.log('chaveData :>> ', chaveData);
+    axios.put("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves", chaveData)
+      .then(response => {
+        const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
+        if (decryptedData) {
+          console.info('Resposta do servidor:', decryptedData);
+        }
+  
+        setSnackbar({
+          open: true,
+          message: 'Chave atualizada',
+          severity: 'success'
+        });
+  
+        // Recarregar lista de chaves após criar/editar
+        axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves")
+          .then(response => {
+            const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
+            if (decryptedData) {
+              setChaves(decryptedData);
+            }
+          });
+  
+        setOpenDialog(false);
+      })
+      .catch(error => {
+        const errorMessage = decryptAES(error.response.data, '0123456789ABCDEF0123456789ABCDEF');
+        console.error('Erro ao salvar chave:', errorMessage);
+        setSnackbar({
+          open: true,
+          message: errorMessage?.message || 'Erro ao salvar chave',
+          severity: 'error'
+        });
+      });
+  }
     return(
       <div className="mx-2 p-4 pt-2 border rounded">
         <h4>Gerenciamento de Chaves</h4>
@@ -167,13 +216,13 @@ function AdminChavesManagement({shouldUpdate}) {
                       color="primary" 
                       onClick={() => {handleEditChave(chave)}}
                     >
-                      <i class="fas fa-pencil-alt    "></i>
+                      <i className="fas fa-pencil-alt    "></i>
                     </IconButton>
                     <IconButton 
                       color="secondary" 
                       onClick={() => {handleDeleteChave(chave.id)}}
                     >
-                      <i class="fas fa-trash    "></i>
+                      <i className="fas fa-trash    "></i>
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -216,12 +265,24 @@ function AdminChavesManagement({shouldUpdate}) {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Cancelar</Button>
-          <Button  color="primary">
+          <Button onClick={handleSaveChave} color="primary">
             Salvar
           </Button>
         </DialogActions>
       </Dialog>
-
+      {/* Snackbar para mensagens */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert 
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
       </div>
       
     );
@@ -424,13 +485,13 @@ function AdminUserManagement() {
                     color="primary" 
                     onClick={() => handleEditUser(user)}
                   >
-                    <i class="fas fa-pencil-alt    "></i>
+                    <i className="fas fa-pencil-alt    "></i>
                   </IconButton>
                   <IconButton 
                     color="secondary" 
                     onClick={() => handleDeleteUser(user.id)}
                   >
-                    <i class="fas fa-trash    "></i>
+                    <i className="fas fa-trash    "></i>
                   </IconButton>
                 </TableCell>
               </TableRow>

@@ -67,39 +67,39 @@ function Claviculario({ shouldUpdate, setShouldUpdate }) {
       return null;
     }
   };
-  
-  const filteredChaves = chaves.filter((chave) =>
-  chave.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  chave.numero.toString().includes(searchTerm)
-);
-
-  
   const handleSearchKeyPress = (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
     }
   };
+  
+  const filteredChaves = chaves
+  .filter((chave) =>
+    chave.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    chave.numero.toString().includes(searchTerm)
+  )
+  .sort((a, b) => Number(a.numero) - Number(b.numero)); // Ordenação pelo número da chave
 
-  const indexOfLastChave = currentPage * chavesPerPage;
-  const indexOfFirstChave = indexOfLastChave - chavesPerPage;
-  const currentChaves = filteredChaves.slice(indexOfFirstChave, indexOfLastChave);
+// Agora aplicamos a paginação nas chaves já filtradas e ordenadas
+const indexOfLastChave = currentPage * chavesPerPage;
+const indexOfFirstChave = indexOfLastChave - chavesPerPage;
+const currentChaves = filteredChaves.slice(indexOfFirstChave, indexOfLastChave);
 
 const renderChaves = () => {
-  const sortedChaves = [...currentChaves].sort((a, b) => a.numero - b.numero);
-
-  return sortedChaves.map(chave => (
-        <div 
-          onClick={() => handleShow(chave)} 
-          className="framechave d-flex flex-column align-items-center border p-1 m-1"
-        >
-          <p className="m-0">{chave.numero}</p>
-          <img
-            className={chave.chaveOn ? 'chavetamanho' : 'chavetamanhosem'}
-            src={chaveImag}
-            alt={`chave ${chave.id}`}
-          />
-          <p className="nomeChave m-0">{chave.nome}</p>
-        </div>
+  return currentChaves.map(chave => (
+    <div 
+      onClick={() => handleShow(chave)} 
+      className="framechave d-flex flex-column align-items-center border p-1 m-1"
+      key={chave.id} // Adicionei uma key única para cada elemento
+    >
+      <p className="m-0">{chave.numero}</p>
+      <img
+        className={chave.chaveOn ? 'chavetamanho' : 'chavetamanhosem'}
+        src={chaveImag}
+        alt={`chave ${chave.id}`} // Corrigi a template string
+      />
+      <p className="nomeChave m-0">{chave.nome}</p>
+    </div>
   ));
 };
 
