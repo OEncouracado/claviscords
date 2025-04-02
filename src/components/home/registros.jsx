@@ -463,7 +463,7 @@ function Registros({tipo, shouldUpdate, setShouldUpdate}) {
             <tbody>
               {filteredDevolucoes.map((item) => (
                 <tr key={item.id || item.id_chave || `empty-${Math.random()}`}>
-                  <td>{item.id_chave}</td>
+                  <td>{getNumeroChave(item.id_chave)}</td>
                   <td>{item.nome_pessoa}</td>
                   <td>{item.data_registro}</td>
                 </tr>
