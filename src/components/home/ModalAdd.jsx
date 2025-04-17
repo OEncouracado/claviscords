@@ -1,37 +1,40 @@
 import React, { useState } from 'react';
 import { FormControl, Input, InputLabel, TextField } from '@mui/material';
-import axios from 'axios';
 import { Button, Form, Modal, ModalBody, ModalFooter, ModalHeader } from 'react-bootstrap';
+import supabase from '../../supabaseClient';
 
-function ModalAdd({ show, handleClose, onKeyAdded,setShouldUpdate }) {
+
+function ModalAdd({ show, handleClose, onKeyAdded, setShouldUpdate }) {
   const [keyName, setKeyName] = useState('');
   const [keyNumber, setKeyNumber] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const response = await axios.post(
-        'https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves', { 
-            nome: keyName,
-            numero: keyNumber
-         }
-      );
-      
-      console.log('Chave adicionada com sucesso:', response.data);
-      
-      // Optional callback to update parent component
-      if (onKeyAdded) {
-        onKeyAdded(response.data.data);
+      const { data, error } = await supabase
+        .from('chaves')
+        .insert([{ nome: keyName, numero: keyNumber, chaveOn: true }]) // adiciona chave com status disponível
+
+      if (error) {
+        console.error('Erro ao adicionar chave:', error);
+        alert('Erro ao adicionar chave. Tente novamente.');
+        return;
       }
-      
-      // Reset form and close modal
+
+      console.log('Chave adicionada com sucesso:', data);
+
+      if (onKeyAdded) {
+        onKeyAdded(data[0]); // supabase retorna array
+      }
+
       setShouldUpdate(true);
       setKeyName('');
       setKeyNumber('');
       handleClose();
-    } catch (error) {
-      console.error('Erro ao adicionar chave:', error);
-      alert('Erro ao adicionar chave. Tente novamente.');
+    } catch (err) {
+      console.error('Erro inesperado:', err);
+      alert('Erro inesperado ao adicionar chave.');
     }
   };
 
@@ -52,18 +55,15 @@ function ModalAdd({ show, handleClose, onKeyAdded,setShouldUpdate }) {
               onChange={(e) => setKeyName(e.target.value)}
               required
             />
-            
-            <FormControl >
-                <InputLabel  htmlFor="numeroChave">Número da Chave</InputLabel>
-                <Input
-                variant='outlined'
-                    id="numeroChave" 
-                    type="number" 
-                    fullWidth
-                    value={keyNumber}
-                    onChange={(e) => setKeyNumber(e.target.value)}
-                    required
-                />
+            <FormControl fullWidth>
+              <InputLabel htmlFor="numeroChave">Número da Chave</InputLabel>
+              <Input
+                id="numeroChave"
+                type="number"
+                value={keyNumber}
+                onChange={(e) => setKeyNumber(e.target.value)}
+                required
+              />
             </FormControl>
           </Form.Group>
         </Form>

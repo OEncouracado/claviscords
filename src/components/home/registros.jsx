@@ -1,9 +1,8 @@
-import axios from "axios"
 import { useEffect, useState } from "react"
-import CryptoJS from 'crypto-js';
 import { Pagination, Table, Button } from "react-bootstrap";
 import jsPDF from 'jspdf';
 import "./index.css"
+import supabase from "../../supabaseClient";
 
 function Registros({tipo, shouldUpdate, setShouldUpdate}) {
   const [listaRetiradas, setListaRetiradas] = useState([]);
@@ -47,8 +46,9 @@ function Registros({tipo, shouldUpdate, setShouldUpdate}) {
     doc.setFontSize(10);
     doc.text(`Data: ${new Date().toLocaleString()} , Usuário: ${usuario.nome}`, margin, 80, { align: 'left' });
 
-    const headers = ['Chave', 'Solicitante', 'Horário do Registro'];
+    const headers = ['Nº','Nome' , 'Solicitante', 'Horário do Registro'];
     const columnsWidth = [
+      pageWidth * 0.1,
       pageWidth * 0.2,
       pageWidth * 0.4,
       pageWidth * 0.3
@@ -81,23 +81,46 @@ function Registros({tipo, shouldUpdate, setShouldUpdate}) {
       }
 
       const rowData = [
-        item.id_chave.toString(),
+        getNumeroChave(item.id_chave).toString(),
+        getNomeChave(item.id_chave).toString(),
         item.nome_pessoa,
-        item.data_registro
+        new Date(item.data_registro).toLocaleString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
       ];
 
       rowData.forEach((text, colIndex) => {
-        doc.text(
-          text, 
-          margin + columnsWidth.slice(0, colIndex).reduce((a, b) => a + b, 0), 
-          currentY
-        );
+        const x = margin + columnsWidth.slice(0, colIndex).reduce((a, b) => a + b, 0);
+        const maxWidth = columnsWidth[colIndex] - 5; // pequeno padding pra não colar na borda
+        const lines = doc.splitTextToSize(text, maxWidth);
+  
+        doc.text(lines, x, currentY);
       });
 
-      doc.setDrawColor(200);
-      doc.line(margin, currentY + 5, pageWidth - margin, currentY + 5);
+      let maxLines = 1;
 
-      currentY += lineHeight;
+rowData.forEach((text, colIndex) => {
+  const maxWidth = columnsWidth[colIndex] - 5;
+  const lines = doc.splitTextToSize(text, maxWidth);
+  if (lines.length > maxLines) maxLines = lines.length;
+});
+
+rowData.forEach((text, colIndex) => {
+  const x = margin + columnsWidth.slice(0, colIndex).reduce((a, b) => a + b, 0);
+  const maxWidth = columnsWidth[colIndex] - 5;
+  const lines = doc.splitTextToSize(text, maxWidth);
+
+  doc.text(lines, x, currentY);
+});
+
+doc.setDrawColor(200);
+doc.line(margin, currentY + maxLines * fontSize + 5, pageWidth - margin, currentY + maxLines * fontSize + 5);
+
+currentY += maxLines * fontSize + 20;
     });
 
     doc.setFontSize(10);
@@ -295,86 +318,81 @@ function Registros({tipo, shouldUpdate, setShouldUpdate}) {
     </div>
   );
 
-  const decryptAES = (encryptedData, password) => {
-    try {
-      const iv = CryptoJS.enc.Hex.parse(encryptedData.iv);
-      const encryptedBytes = CryptoJS.enc.Base64.parse(encryptedData.data);
-
-      const decryptedBytes = CryptoJS.AES.decrypt(
-          { ciphertext: encryptedBytes },
-          CryptoJS.enc.Utf8.parse(password),
-          { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
-      );
-
-      const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
-      return JSON.parse(decryptedText);
-    } catch (error) {
-      console.error('Erro ao descriptografar:', error);
-      return null;
-    }
-  };
   useEffect(() => {
     const fetchChaves = async () => {
-      try {
-        const response = await axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves");
-        const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
+      const { data, error } = await supabase
+        .from('chaves')
+        .select('*');
   
-        if (decryptedData && Array.isArray(decryptedData)) {
-          setChaves(decryptedData);
-        } else {
-          console.error('Erro ao descriptografar os dados de chaves.');
-        }
-      } catch (error) {
-        console.error('Erro ao obter as chaves:', error);
+      if (error) {
+        console.error('Erro ao buscar chaves no Supabase:', error);
+      } else {
+        setChaves(data);
       }
     };
   
+    if (shouldUpdate || !chaves.length) {
+      fetchChaves();
+    }
+  
     fetchChaves();
-  }, []);
+  }, [chaves.length, shouldUpdate]);
 
   const getNumeroChave = (idChave) => {
     const chave = chaves.find(c => c.id === idChave);
     return chave ? chave.numero : 'Desconhecido';
   };
+  const getNomeChave = (idChave) => {
+    const chave = chaves.find(c => c.id === idChave);
+    return chave ? chave.nome : 'Desconhecido';
+  };
   
   useEffect(() => {
-    if (shouldUpdate) {
-      const fetchData = async () => {
-        try {
-          const response = await axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=registros");
-          const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
-          if (decryptedData && Array.isArray(decryptedData)) {
-            setListaRetiradas(decryptedData.filter(registro => registro.tipo === "retirada"));
-            setListaDevolucoes(decryptedData.filter(registro => registro.tipo === "devolucao"));
-            // Reset shouldUpdate after fetching data
-            if (setShouldUpdate) setShouldUpdate(false);
-          }
-        } catch (error) {
-          console.error('Erro ao obter os dados:', error);
+    const fetchData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('registros')
+          .select('*')
+          .order('data_registro', { ascending: false }); // opcional, ordena por data
+  
+        if (error) throw error;
+  
+        if (data && Array.isArray(data)) {
+          setListaRetiradas(data.filter(registro => registro.tipo === "retirada"));
+          setListaDevolucoes(data.filter(registro => registro.tipo === "devolucao"));
         }
-      };
+      } catch (err) {
+        console.error('Erro ao buscar registros:', err);
+      } finally {
+        if (setShouldUpdate) setShouldUpdate(false); // reseta o trigger de atualização
+      }
+    };
+  
+    if (shouldUpdate) {
       fetchData();
     }
   }, [shouldUpdate, setShouldUpdate]);
-
+  
   useEffect(() => {
-    axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=registros")
-    .then(response => {
+    const fetchInitialData = async () => {
       try {
-        const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
-        if (decryptedData && Array.isArray(decryptedData)) {
-          setListaRetiradas(decryptedData.filter(registro => registro.tipo === "retirada"));
-          setListaDevolucoes(decryptedData.filter(registro => registro.tipo === "devolucao"));
-        } else {
-          console.error('Erro ao descriptografar os dados ou os dados não são um array.');
+        const { data, error } = await supabase
+          .from('registros')
+          .select('*')
+          .order('data_registro', { ascending: false });
+  
+        if (error) throw error;
+  
+        if (data && Array.isArray(data)) {
+          setListaRetiradas(data.filter(registro => registro.tipo === "retirada"));
+          setListaDevolucoes(data.filter(registro => registro.tipo === "devolucao"));
         }
-      } catch (error) {
-        console.error('Erro ao processar os dados:', error);
+      } catch (err) {
+        console.error('Erro ao buscar registros iniciais:', err);
       }
-    })
-    .catch(error => {
-      console.error('Erro ao obter as chaves:', error);
-    });
+    };
+  
+    fetchInitialData();
   }, []);
 
   if (tipo === 'retirada') {
@@ -407,6 +425,7 @@ function Registros({tipo, shouldUpdate, setShouldUpdate}) {
             <thead>
               <tr>
                 <th>Chave</th>
+                <th>Nome</th>
                 <th>Solicitante</th>
                 <th>Horário do Registro</th>
               </tr>
@@ -415,8 +434,15 @@ function Registros({tipo, shouldUpdate, setShouldUpdate}) {
               {filteredRetiradas.map((item) => (
                 <tr key={item.id || item.id_chave || `empty-${Math.random()}`}>
                   <td>{getNumeroChave(item.id_chave)}</td>
+                  <td>{getNomeChave(item.id_chave)}</td>
                   <td>{item.nome_pessoa}</td>
-                  <td>{item.data_registro}</td>
+                  <td>{new Date(item.data_registro).toLocaleString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}</td>
                 </tr>
               ))}
             </tbody>
@@ -456,6 +482,7 @@ function Registros({tipo, shouldUpdate, setShouldUpdate}) {
             <thead>
               <tr>
                 <th>Chave</th>
+                <th>Nome</th>
                 <th>Solicitante</th>
                 <th>Horário do Registro</th>
               </tr>
@@ -464,8 +491,15 @@ function Registros({tipo, shouldUpdate, setShouldUpdate}) {
               {filteredDevolucoes.map((item) => (
                 <tr key={item.id || item.id_chave || `empty-${Math.random()}`}>
                   <td>{getNumeroChave(item.id_chave)}</td>
+                  <td>{getNomeChave(item.id_chave)}</td>
                   <td>{item.nome_pessoa}</td>
-                  <td>{item.data_registro}</td>
+                  <td>{new Date(item.data_registro).toLocaleString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}</td>
                 </tr>
               ))}
             </tbody>

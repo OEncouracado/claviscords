@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import chaveImag from "../../images/chave.webp";// eslint-disable-next-line
 import { Form, InputGroup, Pagination,} from 'react-bootstrap';
-import CryptoJS from 'crypto-js';
-import axios from 'axios';// eslint-disable-next-line
-import { BsSearch } from 'react-icons/bs';
+// import CryptoJS from 'crypto-js';
+// import axios from 'axios';// eslint-disable-next-line
+// import { BsSearch } from 'react-icons/bs';
 import "../../index.css"
 import CenteredModal from './Modal';
 import ModalAdd from './ModalAdd';
 import { Search } from '@mui/icons-material';
 import { Alert, InputAdornment, Snackbar, TextField } from '@mui/material';
+import supabase from '../../supabaseClient';
 
 
 function Claviculario({ shouldUpdate, setShouldUpdate }) {
@@ -26,47 +27,66 @@ function Claviculario({ shouldUpdate, setShouldUpdate }) {
   });
 
 
-  useEffect(() => {
-    if (shouldUpdate || !chaves.length) {axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves")
-      .then(response => {
-        try {
-          // Descriptografa os dados
-          const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
-          // const decryptedData = decryptAES(response.data, process.env.REACT_APP_API_KEY);
-          if (decryptedData && Array.isArray(decryptedData)) {
-            // Se decryptedData for um array, você pode configurar as chaves no estado
-            setChaves(decryptedData);
-          } else {
-            console.error('Erro ao descriptografar os dados ou os dados não são um array.');
-          }
-        } catch (error) {
-          console.error('Erro ao processar os dados:', error);
-        }
-      })
-      .catch(error => {
-        console.error('Erro ao obter as chaves:', error);
-      });}
-  }
-  , [shouldUpdate, chaves]);
+  // useEffect(() => {
+  //   if (shouldUpdate || !chaves.length) {axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves")
+  //     .then(response => {
+  //       try {
+  //         // Descriptografa os dados
+  //         const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
+  //         // const decryptedData = decryptAES(response.data, process.env.REACT_APP_API_KEY);
+  //         if (decryptedData && Array.isArray(decryptedData)) {
+  //           // Se decryptedData for um array, você pode configurar as chaves no estado
+  //           setChaves(decryptedData);
+  //         } else {
+  //           console.error('Erro ao descriptografar os dados ou os dados não são um array.');
+  //         }
+  //       } catch (error) {
+  //         console.error('Erro ao processar os dados:', error);
+  //       }
+  //     })
+  //     .catch(error => {
+  //       console.error('Erro ao obter as chaves:', error);
+  //     });}
+  // }
+  // , [shouldUpdate, chaves]);
 
-  const decryptAES = (encryptedData, password) => {
-    try {
-      const iv = CryptoJS.enc.Hex.parse(encryptedData.iv);
-      const encryptedBytes = CryptoJS.enc.Base64.parse(encryptedData.data); // Modificação aqui
+  // const decryptAES = (encryptedData, password) => {
+  //   try {
+  //     const iv = CryptoJS.enc.Hex.parse(encryptedData.iv);
+  //     const encryptedBytes = CryptoJS.enc.Base64.parse(encryptedData.data); // Modificação aqui
 
-      const decryptedBytes = CryptoJS.AES.decrypt(
-          { ciphertext: encryptedBytes },
-          CryptoJS.enc.Utf8.parse(password),
-          { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
-      );
+  //     const decryptedBytes = CryptoJS.AES.decrypt(
+  //         { ciphertext: encryptedBytes },
+  //         CryptoJS.enc.Utf8.parse(password),
+  //         { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
+  //     );
 
-      const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
-      return JSON.parse(decryptedText); // Modificação aqui
-    } catch (error) {
-      console.error('Erro ao descriptografar:', error);
-      return null;
+  //     const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+  //     return JSON.parse(decryptedText); // Modificação aqui
+  //   } catch (error) {
+  //     console.error('Erro ao descriptografar:', error);
+  //     return null;
+  //   }
+  // };
+
+useEffect(() => {
+  const fetchChaves = async () => {
+    const { data, error } = await supabase
+      .from('chaves')
+      .select('*');
+
+    if (error) {
+      console.error('Erro ao buscar chaves no Supabase:', error);
+    } else {
+      setChaves(data);
     }
   };
+
+  if (shouldUpdate || !chaves.length) {
+    fetchChaves();
+  }
+}, [shouldUpdate, chaves]);
+
   const handleSearchKeyPress = (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
