@@ -2830,12 +2830,43 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@stitches/core@npm:^1.2.8":
+  version: 1.2.8
+  resolution: "@stitches/core@npm:1.2.8"
+  checksum: 10c0/f2ddf5aba3f3794529ceda10e573d61d649899c1d6e4f72f0fb77915577bb4e5a1ffc6e0cebd2bc19a1e6f93d5e1e91ff0790c7a8dfb452e90b090b1a5f1c531
+  languageName: node
+  linkType: hard
+
 "@supabase/auth-js@npm:2.69.1":
   version: 2.69.1
   resolution: "@supabase/auth-js@npm:2.69.1"
   dependencies:
     "@supabase/node-fetch": "npm:^2.6.14"
   checksum: 10c0/efc08fc6be48769efc84105617f2cb681791641ba86480d29a316ae83beac8cf4f747bf00b4947c32992f9b7b0b40e3c2bf74013f01e070c38558169ab68b6f1
+  languageName: node
+  linkType: hard
+
+"@supabase/auth-ui-react@npm:^0.4.7":
+  version: 0.4.7
+  resolution: "@supabase/auth-ui-react@npm:0.4.7"
+  dependencies:
+    "@stitches/core": "npm:^1.2.8"
+    "@supabase/auth-ui-shared": "npm:0.1.8"
+    prop-types: "npm:^15.7.2"
+    react: "npm:^18.2.0"
+    react-dom: "npm:^18.2.0"
+  peerDependencies:
+    "@supabase/supabase-js": ^2.21.0
+  checksum: 10c0/841d8f4dc30d672db38e020ede35104ff0ae394585715c52dfef2cd3eb274fbef60211e29970a68efc45bade840159c75ac0567a74c9bf3ec53385c662149581
+  languageName: node
+  linkType: hard
+
+"@supabase/auth-ui-shared@npm:0.1.8, @supabase/auth-ui-shared@npm:^0.1.8":
+  version: 0.1.8
+  resolution: "@supabase/auth-ui-shared@npm:0.1.8"
+  peerDependencies:
+    "@supabase/supabase-js": ^2.21.0
+  checksum: 10c0/5a2b5f5d603827c3f626487fa569ff0c453e398400ff941fa50d66a7a689a1ff54e93ed0483186bc4e982eee25a454b949a97e5eb2a5e8c68b9eee2f9afa307f
   languageName: node
   linkType: hard
 
@@ -5228,6 +5259,8 @@ __metadata:
     "@mui/icons-material": "npm:^6.1.9"
     "@mui/material": "npm:^6.1.9"
     "@mui/styled-engine-sc": "npm:^6.1.8"
+    "@supabase/auth-ui-react": "npm:^0.4.7"
+    "@supabase/auth-ui-shared": "npm:^0.1.8"
     "@supabase/supabase-js": "npm:^2.49.4"
     "@testing-library/jest-dom": "npm:^5.17.0"
     "@testing-library/react": "npm:^13.4.0"
@@ -7418,15 +7451,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fdir@npm:^6.4.3":
-  version: 6.4.3
-  resolution: "fdir@npm:6.4.3"
+"fdir@npm:^6.4.4":
+  version: 6.4.4
+  resolution: "fdir@npm:6.4.4"
   peerDependencies:
     picomatch: ^3 || ^4
   peerDependenciesMeta:
     picomatch:
       optional: true
-  checksum: 10c0/d13c10120e9625adf21d8d80481586200759928c19405a816b77dd28eaeb80e7c59c5def3e2941508045eb06d34eb47fad865ccc8bf98e6ab988bb0ed160fb6f
+  checksum: 10c0/6ccc33be16945ee7bc841e1b4178c0b4cf18d3804894cb482aa514651c962a162f96da7ffc6ebfaf0df311689fb70091b04dd6caffe28d56b9ebdc0e7ccadfdd
   languageName: node
   linkType: hard
 
@@ -12193,7 +12226,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.6.2, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -14268,12 +14301,12 @@ __metadata:
   linkType: hard
 
 "tinyglobby@npm:^0.2.12":
-  version: 0.2.12
-  resolution: "tinyglobby@npm:0.2.12"
+  version: 0.2.13
+  resolution: "tinyglobby@npm:0.2.13"
   dependencies:
-    fdir: "npm:^6.4.3"
+    fdir: "npm:^6.4.4"
     picomatch: "npm:^4.0.2"
-  checksum: 10c0/7c9be4fd3625630e262dcb19015302aad3b4ba7fc620f269313e688f2161ea8724d6cb4444baab5ef2826eb6bed72647b169a33ec8eea37501832a2526ff540f
+  checksum: 10c0/ef07dfaa7b26936601d3f6d999f7928a4d1c6234c5eb36896bb88681947c0d459b7ebe797022400e555fe4b894db06e922b95d0ce60cb05fd827a0a66326b18c
   languageName: node
   linkType: hard
 

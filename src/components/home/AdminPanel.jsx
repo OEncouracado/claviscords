@@ -21,75 +21,37 @@ import {
 import axios from 'axios';
 import  CryptoJS  from 'crypto-js';
 import { Pagination } from 'react-bootstrap';
+import supabase from '../../supabaseClient';
 
-function AdminChavesManagement({shouldUpdate}) {
+function AdminChavesManagement({ shouldUpdate, updateShouldUpdate }) {
   const [chaves, setChaves] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const chavesPerPage = 10;
-  const [openDialog,setOpenDialog] = useState(false);
-  const [currentChave, setCurrentChave] = useState({
-    id: '',
-    nome: '', 
-    numero: '',
-  });
+  const [openDialog, setOpenDialog] = useState(false);
+  const [currentChave, setCurrentChave] = useState({ id: '', nome: '', numero: '' });
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
     severity: 'success'
   });
 
-  // Função para descriptografar dados
-  const decryptAES = (encryptedData, password) => {
-    try {
-      const iv = CryptoJS.enc.Hex.parse(encryptedData.iv);
-      const ciphertext = CryptoJS.enc.Base64.parse(encryptedData.data);
-      const key = CryptoJS.enc.Utf8.parse(password);
-  
-      const decrypted = CryptoJS.AES.decrypt(
-        { ciphertext: ciphertext },
-        key,
-        { 
-          iv: iv, 
-          mode: CryptoJS.mode.CBC, 
-          padding: CryptoJS.pad.Pkcs7 
-        }
-      );
-      
-      const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
-      return JSON.parse(decryptedText);
-    } catch (error) {
-      console.error('Decryption Error:', error);
-      console.error('Encrypted Data:', encryptedData);
-      return null;
-    }}
+  const indexOfLastChave = currentPage * chavesPerPage;
+  const indexOfFirstChave = indexOfLastChave - chavesPerPage;
+  const currentChaves = chaves.slice(indexOfFirstChave, indexOfLastChave);
 
-
-    const indexOfLastChave = currentPage * chavesPerPage;
-    const indexOfFirstChave = indexOfLastChave - chavesPerPage;
-    const currentChaves = chaves.slice(indexOfFirstChave, indexOfLastChave);
-
-  // Buscar Chaves
   useEffect(() => {
-    axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves")
-      .then(response => {
-        try {
-          // Descriptografa os dados
-          const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
-          // const decryptedData = decryptAES(response.data, process.env.REACT_APP_API_KEY);
-          if (decryptedData) {
-            // Se decryptedData for um array, você pode configurar as chaves no estado
-            setChaves(decryptedData);
-          } else {
-            console.error('Erro ao descriptografar os dados ou os dados não são um array.');
-          }
-        } catch (error) {
-          console.error('Erro ao processar os dados:', error);
-        }
-      })
-      .catch(error => {
-        console.error('Erro ao obter as chaves:', error);
-      });}
-  , [shouldUpdate]);
+    const fetchChaves = async () => {
+      const { data, error } = await supabase.from('chaves').select('*');
+      if (error) {
+        console.error('Erro ao buscar chaves:', error.message);
+        return;
+      }
+      setChaves(data);
+    };
+
+    fetchChaves();
+  }, [shouldUpdate]);
+
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const pageNumbers = [];
@@ -101,144 +63,109 @@ function AdminChavesManagement({shouldUpdate}) {
     );
   }
 
-   // Abrir diálogo para editar usuário
-   const handleEditChave = (chave) => {
-    setCurrentChave({
-      ...chave
-    });
-    console.log('currentChave :>> ', currentChave);
+  const handleEditChave = (chave) => {
+    setCurrentChave({ ...chave });
     setOpenDialog(true);
   };
-  //Deletar Chave
-  const handleDeleteChave = async (chaveID) => {
-    try {
-      await axios.delete(
-        `https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves&id=${chaveID}`
-      );
-      axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves")
-          .then(response => {
-            const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
-            if (decryptedData) {
-              setChaves(decryptedData);
-            }
-          });
-      setSnackbar({
-        open: true,
-        message: 'Chave deletada',
-        severity: 'success'
-      });
 
-    } catch(error) {
-      const errorMessage = decryptAES(error.response.data, '0123456789ABCDEF0123456789ABCDEF');
-      console.error('Erro ao Deletar Chave:', errorMessage);
+  const handleDeleteChave = async (chaveID) => {
+    const { error } = await supabase.from('chaves').delete().eq('id', chaveID);
+    if (error) {
+      console.error('Erro ao deletar chave:', error.message);
       setSnackbar({
         open: true,
-        message: errorMessage?.message || 'Erro ao Deletar Chave',
+        message: 'Erro ao deletar chave',
         severity: 'error'
       });
-    };
-  
+      return;
+    }
+
+    const { data } = await supabase.from('chaves').select('*');
+    setChaves(data);
+    setSnackbar({
+      open: true,
+      message: 'Chave deletada com sucesso',
+      severity: 'success'
+    });
   };
-  // Salvar chave (novo ou editado)
-  const handleSaveChave = () => {
-    // Construa o objeto com a conversão explícita
-    console.log('currentChaveEnvio :>> ', currentChave);
-    const chaveData = {
-      id: currentChave.id,
-      nome: currentChave.nome,
-      numero: currentChave.numero,
-    };
-  console.log('chaveData :>> ', chaveData);
-    axios.put("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves", chaveData)
-      .then(response => {
-        const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
-        if (decryptedData) {
-          console.info('Resposta do servidor:', decryptedData);
-        }
-  
-        setSnackbar({
-          open: true,
-          message: 'Chave atualizada',
-          severity: 'success'
-        });
-  
-        // Recarregar lista de chaves após criar/editar
-        axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=chaves")
-          .then(response => {
-            const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
-            if (decryptedData) {
-              setChaves(decryptedData);
-            }
-          });
-  
-        setOpenDialog(false);
+
+  const handleSaveChave = async () => {
+    const { error } = await supabase
+      .from('chaves')
+      .update({
+        nome: currentChave.nome,
+        numero: currentChave.numero,
       })
-      .catch(error => {
-        const errorMessage = decryptAES(error.response.data, '0123456789ABCDEF0123456789ABCDEF');
-        console.error('Erro ao salvar chave:', errorMessage);
-        setSnackbar({
-          open: true,
-          message: errorMessage?.message || 'Erro ao salvar chave',
-          severity: 'error'
-        });
+      .eq('id', currentChave.id);
+
+    if (error) {
+      console.error('Erro ao atualizar chave:', error.message);
+      setSnackbar({
+        open: true,
+        message: 'Erro ao atualizar chave',
+        severity: 'error'
       });
-  }
-    return(
-      <div className="mx-2 p-4 pt-2 border rounded">
-        <h4>Gerenciamento de Chaves</h4>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Nome</TableCell>
-                <TableCell>Número</TableCell>
-                <TableCell>Estado</TableCell>
-                <TableCell>Ações</TableCell>
+      return;
+    }
+
+    const { data } = await supabase.from('chaves').select('*');
+    setChaves(data);
+    setSnackbar({
+      open: true,
+      message: 'Chave atualizada com sucesso',
+      severity: 'success'
+    });
+    setOpenDialog(false);
+  };
+
+  return (
+    <div className="mx-2 p-4 pt-2 border rounded">
+      <h4>Gerenciamento de Chaves</h4>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>ID</TableCell>
+              <TableCell>Nome</TableCell>
+              <TableCell>Número</TableCell>
+              <TableCell>Estado</TableCell>
+              <TableCell>Ações</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {currentChaves.map((chave) => (
+              <TableRow key={chave.id}>
+                <TableCell>{chave.id}</TableCell>
+                <TableCell>{chave.nome}</TableCell>
+                <TableCell>{chave.numero}</TableCell>
+                <TableCell>
+                  <Switch
+                    checked={chave.chaveOn === 0}
+                    title={chave.chaveOn === 0 ? "Chave Retirada" : "Chave Disponível"}
+                    color="secondary"
+                    disabled
+                  />
+                </TableCell>
+                <TableCell>
+                  <IconButton color="primary" onClick={() => handleEditChave(chave)}>
+                    <i className="fas fa-pencil-alt" />
+                  </IconButton>
+                  <IconButton color="secondary" onClick={() => handleDeleteChave(chave.id)}>
+                    <i className="fas fa-trash" />
+                  </IconButton>
+                </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {currentChaves.map((chave) => (
-                <TableRow key={chave.id}>
-                  <TableCell>{chave.id}</TableCell>
-                  <TableCell>{chave.nome}</TableCell>
-                  <TableCell>{chave.numero}</TableCell>
-                  <TableCell>
-                    <Switch 
-                      checked={chave.chaveOn === 0}
-                      title={chave.chaveOn === 0 ? "Chave Retirada":"Chave Disponível"}
-                      color="secondary" 
-                      disabled
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <IconButton 
-                      color="primary" 
-                      onClick={() => {handleEditChave(chave)}}
-                    >
-                      <i className="fas fa-pencil-alt    "></i>
-                    </IconButton>
-                    <IconButton 
-                      color="secondary" 
-                      onClick={() => {handleDeleteChave(chave.id)}}
-                    >
-                      <i className="fas fa-trash    "></i>
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-              
-            </TableBody>
-          </Table>
-         
-        </TableContainer>
-        <Pagination className="mt-1">
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Pagination className="mt-1">
         {pageNumbers}
       </Pagination>
+
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>
-          Editar Chave
-        </DialogTitle>
+        <DialogTitle>Editar Chave</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -246,10 +173,7 @@ function AdminChavesManagement({shouldUpdate}) {
             label="Nome"
             fullWidth
             value={currentChave.nome}
-            onChange={(e) => setCurrentChave({
-              ...currentChave, 
-              nome: e.target.value
-            })}
+            onChange={(e) => setCurrentChave({ ...currentChave, nome: e.target.value })}
           />
           <TextField
             margin="dense"
@@ -257,10 +181,7 @@ function AdminChavesManagement({shouldUpdate}) {
             type="number"
             fullWidth
             value={currentChave.numero}
-            onChange={(e) => setCurrentChave({
-              ...currentChave, 
-              numero: e.target.value
-            })}
+            onChange={(e) => setCurrentChave({ ...currentChave, numero: e.target.value })}
           />
         </DialogContent>
         <DialogActions>
@@ -270,23 +191,22 @@ function AdminChavesManagement({shouldUpdate}) {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* Snackbar para mensagens */}
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
       >
-        <Alert 
+        <Alert
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.severity}
         >
           {snackbar.message}
         </Alert>
       </Snackbar>
-      </div>
-      
-    );
-};
+    </div>
+  );
+}
 
 function AdminUserManagement() {
   const [users, setUsers] = useState([]);
@@ -328,31 +248,19 @@ function AdminUserManagement() {
       return null;
     }
   };
+  const fetchUsers = async () => {
+    const { data, error } = await supabase.from('usuarios').select('*');
+    if (error) {
+      console.error('Erro ao buscar usuários:', error.message);
+      return;
+    }
+    setUsers(data);
+  };
 
   // Buscar usuários
   useEffect(() => {
-    axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=usuarios")
-      .then(response => {
-        try {
-          // Descriptografa os dados
-          const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
-          // const decryptedData = decryptAES(response.data, process.env.REACT_APP_API_KEY);
-          if (decryptedData) {
-            // Se decryptedData for um array, você pode configurar as chaves no estado
-            setUsers(decryptedData);
-          } else {
-            console.error('Erro ao descriptografar os dados ou os dados não são um array.');
-          }
-        } catch (error) {
-          console.error('Erro ao processar os dados:', error);
-        }
-      })
-      .catch(error => {
-        console.error('Erro ao obter as chaves:', error);
-      });}
-  , []);
-
-
+     fetchUsers();
+  }, []);
   // Abrir diálogo para novo usuário
   const handleOpenNewUserDialog = () => {
     setCurrentUser({
@@ -375,46 +283,84 @@ function AdminUserManagement() {
   };
 
   // Salvar usuário (novo ou editado)
-  const handleSaveUser = () => { 
-    // Construa o objeto com a conversão explícita
+  const handleSaveUser = async () => { 
     const userData = {
       ...(isEditing ? { id: currentUser.id } : {}), // Adiciona ID apenas quando estiver editando
-      adm: currentUser.adm ? 1 : 0, // Conversão explícita para número
+      adm: currentUser.adm , // Conversão explícita para número
       nome: currentUser.nome,
       senha: currentUser.senha,
     };
-  
-    axios.post('https://hospitalemcor.com.br/claviscord/api/index.php?table=usuarios', userData)
-      .then(response => {
-        console.info('Resposta do servidor:', response);
-  
+    await supabase
+      .from('usuarios')
+      .upsert(userData, { returning: 'minimal' }) // Retorna apenas o ID
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Erro ao salvar usuário:', error.message);
+          setSnackbar({
+            open: true,
+            message: 'Erro ao salvar usuário',
+            severity: 'error'
+          });
+          return;
+        }
         setSnackbar({
           open: true,
-          message: isEditing ? 'Usuário atualizado' : 'Usuário criado',
+          message: isEditing ? 'Usuário atualizado' : 'Usuário criado', 
           severity: 'success'
         });
-  
         // Recarregar lista de usuários após criar/editar
-        axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=usuarios")
-          .then(response => {
-            const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
-            if (decryptedData) {
-              setUsers(decryptedData);
-            }
-          });
-  
+        fetchUsers();
         setOpenDialog(false);
       })
       .catch(error => {
-        const errorMessage = decryptAES(error.response.data, '0123456789ABCDEF0123456789ABCDEF');
-        console.error('Erro ao salvar usuário:', errorMessage);
+        console.error('Erro ao salvar usuário:', error.message);
         setSnackbar({
           open: true,
-          message: errorMessage?.message || 'Erro ao salvar usuário',
+          message: 'Erro ao salvar usuário',
           severity: 'error'
         });
       });
   };
+  // const handleSaveUser = () => { 
+  //   // Construa o objeto com a conversão explícita
+  //   const userData = {
+  //     ...(isEditing ? { id: currentUser.id } : {}), // Adiciona ID apenas quando estiver editando
+  //     adm: currentUser.adm , // Conversão explícita para número
+  //     nome: currentUser.nome,
+  //     senha: currentUser.senha,
+  //   };
+  
+  //   axios.post('https://hospitalemcor.com.br/claviscord/api/index.php?table=usuarios', userData)
+  //     .then(response => {
+  //       console.info('Resposta do servidor:', response);
+  
+  //       setSnackbar({
+  //         open: true,
+  //         message: isEditing ? 'Usuário atualizado' : 'Usuário criado', 
+  //         severity: 'success'
+  //       });
+  
+  //       // Recarregar lista de usuários após criar/editar
+  //       axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=usuarios")
+  //         .then(response => {
+  //           const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
+  //           if (decryptedData) {
+  //             setUsers(decryptedData);
+  //           }
+  //         });
+  
+  //       setOpenDialog(false);
+  //     })
+  //     .catch(error => {
+  //       const errorMessage = decryptAES(error.response.data, '0123456789ABCDEF0123456789ABCDEF');
+  //       console.error('Erro ao salvar usuário:', errorMessage);
+  //       setSnackbar({
+  //         open: true,
+  //         message: errorMessage?.message || 'Erro ao salvar usuário',
+  //         severity: 'error'
+  //       });
+  //     });
+  // };
   
   // Deletar usuário
   const handleDeleteUser = async (userId) => {
@@ -475,7 +421,7 @@ function AdminUserManagement() {
                 <TableCell>{user.nome}</TableCell>
                 <TableCell>
                   <Switch 
-                    checked={user.adm === 1} 
+                    checked={user.adm === true} 
                     color="primary" 
                     disabled
                   />
@@ -530,10 +476,10 @@ function AdminUserManagement() {
             helperText={isEditing ? 'Deixe em branco para manter a senha atual' : ''}
           />
           <Switch
-            checked={currentUser.adm === 1}
+            checked={currentUser.adm === true}
             onChange={(e) => setCurrentUser({
               ...currentUser, 
-              adm: e.target.checked ? 1 : 0
+              adm: e.target.checked
             })}
           />
           <span>Administrador</span>

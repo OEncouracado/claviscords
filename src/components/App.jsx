@@ -5,12 +5,15 @@ import logo from "../images/logo.png";
 import "../App.css"
 import Registros from './home/registros';
 import Config from './home/Config';
-import {AdminChavesManagement, AdminUserManagement} from './home/AdminPanel';
+import {AdminChavesManagement, AdminUserManagement} from './home/AdminPanel'; // eslint-disable-next-line
+import Login2 from './home/login copy';
+import { useAuth } from '../context/AuthContext';
 
 function Appx() {
   const [show, setShow] = useState(false)
   const [shouldUpdate, setShouldUpdate] = useState(false);
   const token = JSON.parse(localStorage.getItem('token'));
+  const {signOut} = useAuth();
 
   // Função para alterar o estado de shouldUpdate
   const updateShouldUpdate = (value) => {
@@ -28,20 +31,8 @@ function Appx() {
     }
   };
   
-  // Função para voltar shouldUpdate para false após 2 segundos
-  // const resetToFalse = () => {
-  //   setTimeout(() => {
-  //     setShouldUpdate(false);
-  //   }, 5000); // Tempo em milissegundos
-  // };
-
-  const handleClose = () => {
-    localStorage.removeItem('token');
-    setShow(false);
-    window.location.reload();
-  }
   return (<>
-  <Button className='fechar' variant='danger' onClick={() => setShow(true)}>X</Button>
+  <Button className='fechar' title='sair' variant='danger' onClick={() => setShow(true)}>X</Button>
     <div className="App">
       <header className="App-header">
         <img className='logomarca mt-1 mb-0' src={logo} alt='claviscord logo'/>
@@ -74,6 +65,11 @@ function Appx() {
                       <Config />
                 </Container>
             </Tab>
+            {/* <Tab eventKey="login2" title="Teste">
+            <Container className="p-0 d-flex justify-content-center" >
+                      <Login2 />
+                </Container>
+            </Tab> */}
             {token?.Adm === 1 ? <Tab eventKey="admPainel" title="Administração">
             <Container className="p-0 py-2 d-flex justify-content-center" >
                       <AdminUserManagement />
@@ -100,7 +96,7 @@ function Appx() {
           Clique em "Sair" para sair do programa
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="success" onClick={handleClose}>
+          <Button variant="success" onClick={() => signOut()}>
             Sair
           </Button>
           <Button variant="primary" onClick={() => setShow(false)}>Cancelar</Button>
