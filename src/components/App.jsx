@@ -2,18 +2,20 @@ import React, { useState } from 'react';
 import { Button, Container, Modal, Tab, Tabs } from 'react-bootstrap';
 import Claviculario from '../components/home';
 import logo from "../images/logo.png";
-import "../App.css"
-import Registros from './home/registros';
-import Config from './home/Config';
-import {AdminChavesManagement, AdminUserManagement} from './home/AdminPanel'; // eslint-disable-next-line
-import Login2 from './home/login copy';
-import { useAuth } from '../context/AuthContext';
+import "../App.css"; // eslint-disable-next-line
+import Registros from "./home/registros";
+import Config from "./home/Config";
+import { AdminChavesManagement, AdminUserManagement } from "./home/AdminPanel"; // eslint-disable-next-line
+import Login2 from "./home/login copy";
+import { useAuth } from "../context/AuthContext";
+import Dashboard from "./home/dashboard";
+import Registros2 from "./home/registros2";
 
 function Appx() {
-  const [show, setShow] = useState(false)
+  const [show, setShow] = useState(false);
   const [shouldUpdate, setShouldUpdate] = useState(false);
-  const token = JSON.parse(localStorage.getItem('token'));
-  const {signOut} = useAuth();
+  const token = JSON.parse(localStorage.getItem("token"));
+  const { signOut } = useAuth();
 
   // Função para alterar o estado de shouldUpdate
   const updateShouldUpdate = (value) => {
@@ -30,79 +32,120 @@ function Appx() {
       // resetToFalse();
     }
   };
-  
-  return (<>
-  <Button className='fechar' title='sair' variant='danger' onClick={() => setShow(true)}>X</Button>
-    <div className="App">
-      <header className="App-header">
-        <img className='logomarca mt-1 mb-0' src={logo} alt='claviscord logo'/>
-        <Container className="cont-geral px-0">
 
-          <Tabs
-            defaultActiveKey="home"
-            id="tabs"
-            className="mb-1"
-            justify
-          >
-            <Tab eventKey="home" title="Claviculário" >
-                <Container className="p-0 d-flex justify-content-center" >
-                    <Claviculario shouldUpdate={shouldUpdate} setShouldUpdate={updateShouldUpdate}/>
+  return (
+    <>
+      <Button
+        className="fechar"
+        title="sair"
+        variant="danger"
+        onClick={() => setShow(true)}
+      >
+        X
+      </Button>
+      <div className="App">
+        <header className="App-header">
+          <img
+            className="logomarca mt-1 mb-0"
+            src={logo}
+            alt="claviscord logo"
+          />
+          <Container className="cont-geral px-0">
+            <Tabs defaultActiveKey="home" id="tabs" className="mb-1" justify>
+              <Tab eventKey="home" title="Claviculário">
+                <Container className="p-0 d-flex justify-content-center">
+                  <Claviculario
+                    shouldUpdate={shouldUpdate}
+                    setShouldUpdate={updateShouldUpdate}
+                  />
                 </Container>
-
-            </Tab>
-            <Tab eventKey="retir" title="Retiradas">
-                <Container className="p-0 d-flex justify-content-center" >
-                      <Registros tipo={'retirada'} shouldUpdate={shouldUpdate} setShouldUpdate={updateShouldUpdate}/>
+              </Tab>
+              <Tab eventKey="registros" title="Registros">
+                <Container className="p-0 d-flex justify-content-center">
+                  <Registros2
+                    shouldUpdate={shouldUpdate}
+                    setShouldUpdate={updateShouldUpdate}
+                  />
                 </Container>
-            </Tab>
-            <Tab eventKey="devol" title="Devoluções">
-            <Container className="p-0 d-flex justify-content-center" >
-                      <Registros tipo={'devolucao'} shouldUpdate={shouldUpdate} setShouldUpdate={updateShouldUpdate}/>
+              </Tab>
+              {/* <Tab eventKey="retir" title="Retiradas">
+                <Container className="p-0 d-flex justify-content-center">
+                  <Registros
+                    tipo={"retirada"}
+                    shouldUpdate={shouldUpdate}
+                    setShouldUpdate={updateShouldUpdate}
+                  />
                 </Container>
-            </Tab>
-            <Tab eventKey="config" title="Configurações">
-            <Container className="p-0 d-flex justify-content-center" >
-                      <Config />
+              </Tab>
+              <Tab eventKey="devol" title="Devoluções">
+                <Container className="p-0 d-flex justify-content-center">
+                  <Registros
+                    tipo={"devolucao"}
+                    shouldUpdate={shouldUpdate}
+                    setShouldUpdate={updateShouldUpdate}
+                  />
                 </Container>
-            </Tab>
-            {/* <Tab eventKey="login2" title="Teste">
-            <Container className="p-0 d-flex justify-content-center" >
-                      <Login2 />
+              </Tab> */}
+              <Tab eventKey="config" title="Configurações">
+                <Container className="p-0 d-flex justify-content-center">
+                  <Config />
                 </Container>
-            </Tab> */}
-            {token?.Adm === 1 ? <Tab eventKey="admPainel" title="Administração">
-            <Container className="p-0 py-2 d-flex justify-content-center" >
-                      <AdminUserManagement />
-                      <AdminChavesManagement shouldUpdate={shouldUpdate} setShouldUpdate={updateShouldUpdate}/>
+              </Tab>
+              <Tab eventKey="login2" title="Teste">
+                <Container className="p-0 d-flex justify-content-center">
+                  <Dashboard />
                 </Container>
-            </Tab>:""}
-          </Tabs>
-        </Container>
-        <p className='desenvpor' >Desenvolvido por: <a href="https://mavsleo.com.br" target="_blank" rel="noopener noreferrer">MAVsLEO &copy; </a>• 2016 </p>
-      </header>
-      
-    </div>
-    <Modal
+              </Tab>
+              {token?.Adm === 1 ? (
+                <Tab eventKey="admPainel" title="Administração">
+                  <Container className="p-0 py-2 d-flex justify-content-center">
+                    <AdminUserManagement />
+                    <AdminChavesManagement
+                      shouldUpdate={shouldUpdate}
+                      setShouldUpdate={updateShouldUpdate}
+                    />
+                  </Container>
+                </Tab>
+              ) : (
+                ""
+              )}
+            </Tabs>
+          </Container>
+          <p className="desenvpor">
+            Desenvolvido por:{" "}
+            <a
+              href="https://mavsleo.com.br"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              MAVsLEO &copy;{" "}
+            </a>
+            • 2016{" "}
+          </p>
+        </header>
+      </div>
+      <Modal
         show={show}
         onHide={() => setShow(false)}
         backdrop="static"
         keyboard={false}
-        className='text-white'
+        className="text-white"
       >
         <Modal.Header closeButton>
           <Modal.Title>Você está saindo do Programa...</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          Clique em "Sair" para sair do programa
-        </Modal.Body>
+        <Modal.Body>Clique em "Sair" para sair do programa</Modal.Body>
         <Modal.Footer>
           <Button variant="success" onClick={() => signOut()}>
             Sair
           </Button>
-          <Button variant="primary" onClick={() => setShow(false)}>Cancelar</Button>
+          <Button variant="primary" onClick={() => setShow(false)}>
+            Cancelar
+          </Button>
         </Modal.Footer>
       </Modal>
-  </>);
+    </>
+  );
 }
 
 export default Appx;

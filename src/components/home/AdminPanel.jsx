@@ -1,38 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  Paper, 
-  Button, 
-  Dialog, 
-  DialogActions, 
-  DialogContent, 
-  DialogTitle, 
-  TextField, 
-  Snackbar, 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Snackbar,
   Alert,
   IconButton,
-  Switch
-} from '@mui/material';
-import axios from 'axios';
-import  CryptoJS  from 'crypto-js';
-import { Pagination } from 'react-bootstrap';
-import supabase from '../../supabaseClient';
+  Switch,
+} from "@mui/material";
+import { Pagination } from "react-bootstrap";
+import supabase from "../../supabaseClient";
 
 function AdminChavesManagement({ shouldUpdate, updateShouldUpdate }) {
   const [chaves, setChaves] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const chavesPerPage = 10;
   const [openDialog, setOpenDialog] = useState(false);
-  const [currentChave, setCurrentChave] = useState({ id: '', nome: '', numero: '' });
+  const [currentChave, setCurrentChave] = useState({
+    id: "",
+    nome: "",
+    numero: "",
+  });
   const [snackbar, setSnackbar] = useState({
     open: false,
-    message: '',
-    severity: 'success'
+    message: "",
+    severity: "success",
   });
 
   const indexOfLastChave = currentPage * chavesPerPage;
@@ -41,9 +43,9 @@ function AdminChavesManagement({ shouldUpdate, updateShouldUpdate }) {
 
   useEffect(() => {
     const fetchChaves = async () => {
-      const { data, error } = await supabase.from('chaves').select('*');
+      const { data, error } = await supabase.from("chaves").select("*");
       if (error) {
-        console.error('Erro ao buscar chaves:', error.message);
+        console.error("Erro ao buscar chaves:", error.message);
         return;
       }
       setChaves(data);
@@ -57,7 +59,11 @@ function AdminChavesManagement({ shouldUpdate, updateShouldUpdate }) {
   const pageNumbers = [];
   for (let i = 1; i <= Math.ceil(chaves.length / chavesPerPage); i++) {
     pageNumbers.push(
-      <Pagination.Item key={i} active={i === currentPage} onClick={() => paginate(i)}>
+      <Pagination.Item
+        key={i}
+        active={i === currentPage}
+        onClick={() => paginate(i)}
+      >
         {i}
       </Pagination.Item>
     );
@@ -69,51 +75,51 @@ function AdminChavesManagement({ shouldUpdate, updateShouldUpdate }) {
   };
 
   const handleDeleteChave = async (chaveID) => {
-    const { error } = await supabase.from('chaves').delete().eq('id', chaveID);
+    const { error } = await supabase.from("chaves").delete().eq("id", chaveID);
     if (error) {
-      console.error('Erro ao deletar chave:', error.message);
+      console.error("Erro ao deletar chave:", error.message);
       setSnackbar({
         open: true,
-        message: 'Erro ao deletar chave',
-        severity: 'error'
+        message: "Erro ao deletar chave",
+        severity: "error",
       });
       return;
     }
 
-    const { data } = await supabase.from('chaves').select('*');
+    const { data } = await supabase.from("chaves").select("*");
     setChaves(data);
     setSnackbar({
       open: true,
-      message: 'Chave deletada com sucesso',
-      severity: 'success'
+      message: "Chave deletada com sucesso",
+      severity: "success",
     });
   };
 
   const handleSaveChave = async () => {
     const { error } = await supabase
-      .from('chaves')
+      .from("chaves")
       .update({
         nome: currentChave.nome,
         numero: currentChave.numero,
       })
-      .eq('id', currentChave.id);
+      .eq("id", currentChave.id);
 
     if (error) {
-      console.error('Erro ao atualizar chave:', error.message);
+      console.error("Erro ao atualizar chave:", error.message);
       setSnackbar({
         open: true,
-        message: 'Erro ao atualizar chave',
-        severity: 'error'
+        message: "Erro ao atualizar chave",
+        severity: "error",
       });
       return;
     }
 
-    const { data } = await supabase.from('chaves').select('*');
+    const { data } = await supabase.from("chaves").select("*");
     setChaves(data);
     setSnackbar({
       open: true,
-      message: 'Chave atualizada com sucesso',
-      severity: 'success'
+      message: "Chave atualizada com sucesso",
+      severity: "success",
     });
     setOpenDialog(false);
   };
@@ -141,16 +147,26 @@ function AdminChavesManagement({ shouldUpdate, updateShouldUpdate }) {
                 <TableCell>
                   <Switch
                     checked={chave.chaveOn === 0}
-                    title={chave.chaveOn === 0 ? "Chave Retirada" : "Chave Disponível"}
+                    title={
+                      chave.chaveOn === 0
+                        ? "Chave Retirada"
+                        : "Chave Disponível"
+                    }
                     color="secondary"
                     disabled
                   />
                 </TableCell>
                 <TableCell>
-                  <IconButton color="primary" onClick={() => handleEditChave(chave)}>
+                  <IconButton
+                    color="primary"
+                    onClick={() => handleEditChave(chave)}
+                  >
                     <i className="fas fa-pencil-alt" />
                   </IconButton>
-                  <IconButton color="secondary" onClick={() => handleDeleteChave(chave.id)}>
+                  <IconButton
+                    color="secondary"
+                    onClick={() => handleDeleteChave(chave.id)}
+                  >
                     <i className="fas fa-trash" />
                   </IconButton>
                 </TableCell>
@@ -160,9 +176,7 @@ function AdminChavesManagement({ shouldUpdate, updateShouldUpdate }) {
         </Table>
       </TableContainer>
 
-      <Pagination className="mt-1">
-        {pageNumbers}
-      </Pagination>
+      <Pagination className="mt-1">{pageNumbers}</Pagination>
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Editar Chave</DialogTitle>
@@ -173,7 +187,9 @@ function AdminChavesManagement({ shouldUpdate, updateShouldUpdate }) {
             label="Nome"
             fullWidth
             value={currentChave.nome}
-            onChange={(e) => setCurrentChave({ ...currentChave, nome: e.target.value })}
+            onChange={(e) =>
+              setCurrentChave({ ...currentChave, nome: e.target.value })
+            }
           />
           <TextField
             margin="dense"
@@ -181,7 +197,9 @@ function AdminChavesManagement({ shouldUpdate, updateShouldUpdate }) {
             type="number"
             fullWidth
             value={currentChave.numero}
-            onChange={(e) => setCurrentChave({ ...currentChave, numero: e.target.value })}
+            onChange={(e) =>
+              setCurrentChave({ ...currentChave, numero: e.target.value })
+            }
           />
         </DialogContent>
         <DialogActions>
@@ -212,46 +230,20 @@ function AdminUserManagement() {
   const [users, setUsers] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [currentUser, setCurrentUser] = useState({
-    nome: '',
-    senha: '',
-    adm: false
+    nome: "",
+    senha: "",
+    adm: false,
   });
   const [isEditing, setIsEditing] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
-    message: '',
-    severity: 'success'
+    message: "",
+    severity: "success",
   });
-
-  // Função para descriptografar dados
-  const decryptAES = (encryptedData, password) => {
-    try {
-      const iv = CryptoJS.enc.Hex.parse(encryptedData.iv);
-      const ciphertext = CryptoJS.enc.Base64.parse(encryptedData.data);
-      const key = CryptoJS.enc.Utf8.parse(password);
-  
-      const decrypted = CryptoJS.AES.decrypt(
-        { ciphertext: ciphertext },
-        key,
-        { 
-          iv: iv, 
-          mode: CryptoJS.mode.CBC, 
-          padding: CryptoJS.pad.Pkcs7 
-        }
-      );
-      
-      const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
-      return JSON.parse(decryptedText);
-    } catch (error) {
-      console.error('Decryption Error:', error);
-      console.error('Encrypted Data:', encryptedData);
-      return null;
-    }
-  };
   const fetchUsers = async () => {
-    const { data, error } = await supabase.from('usuarios').select('*');
+    const { data, error } = await supabase.from("usuarios").select("*");
     if (error) {
-      console.error('Erro ao buscar usuários:', error.message);
+      console.error("Erro ao buscar usuários:", error.message);
       return;
     }
     setUsers(data);
@@ -259,14 +251,14 @@ function AdminUserManagement() {
 
   // Buscar usuários
   useEffect(() => {
-     fetchUsers();
+    fetchUsers();
   }, []);
   // Abrir diálogo para novo usuário
   const handleOpenNewUserDialog = () => {
     setCurrentUser({
-      nome: '',
-      senha: '',
-      adm: false
+      nome: "",
+      senha: "",
+      adm: false,
     });
     setIsEditing(false);
     setOpenDialog(true);
@@ -276,117 +268,84 @@ function AdminUserManagement() {
   const handleEditUser = (user) => {
     setCurrentUser({
       ...user,
-      senha: '' // Limpar senha por segurança
+      senha: "", // Limpar senha por segurança
     });
     setIsEditing(true);
     setOpenDialog(true);
   };
 
   // Salvar usuário (novo ou editado)
-  const handleSaveUser = async () => { 
+  const handleSaveUser = async () => {
     const userData = {
       ...(isEditing ? { id: currentUser.id } : {}), // Adiciona ID apenas quando estiver editando
-      adm: currentUser.adm , // Conversão explícita para número
+      adm: currentUser.adm, // Conversão explícita para número
       nome: currentUser.nome,
       senha: currentUser.senha,
     };
     await supabase
-      .from('usuarios')
-      .upsert(userData, { returning: 'minimal' }) // Retorna apenas o ID
+      .from("usuarios")
+      .upsert(userData, { returning: "minimal" }) // Retorna apenas o ID
       .then(({ data, error }) => {
         if (error) {
-          console.error('Erro ao salvar usuário:', error.message);
+          console.error("Erro ao salvar usuário:", error.message);
           setSnackbar({
             open: true,
-            message: 'Erro ao salvar usuário',
-            severity: 'error'
+            message: "Erro ao salvar usuário",
+            severity: "error",
           });
           return;
         }
         setSnackbar({
           open: true,
-          message: isEditing ? 'Usuário atualizado' : 'Usuário criado', 
-          severity: 'success'
+          message: isEditing ? "Usuário atualizado" : "Usuário criado",
+          severity: "success",
         });
         // Recarregar lista de usuários após criar/editar
         fetchUsers();
         setOpenDialog(false);
       })
-      .catch(error => {
-        console.error('Erro ao salvar usuário:', error.message);
+      .catch((error) => {
+        console.error("Erro ao salvar usuário:", error.message);
         setSnackbar({
           open: true,
-          message: 'Erro ao salvar usuário',
-          severity: 'error'
+          message: "Erro ao salvar usuário",
+          severity: "error",
         });
       });
   };
-  // const handleSaveUser = () => { 
-  //   // Construa o objeto com a conversão explícita
-  //   const userData = {
-  //     ...(isEditing ? { id: currentUser.id } : {}), // Adiciona ID apenas quando estiver editando
-  //     adm: currentUser.adm , // Conversão explícita para número
-  //     nome: currentUser.nome,
-  //     senha: currentUser.senha,
-  //   };
-  
-  //   axios.post('https://hospitalemcor.com.br/claviscord/api/index.php?table=usuarios', userData)
-  //     .then(response => {
-  //       console.info('Resposta do servidor:', response);
-  
-  //       setSnackbar({
-  //         open: true,
-  //         message: isEditing ? 'Usuário atualizado' : 'Usuário criado', 
-  //         severity: 'success'
-  //       });
-  
-  //       // Recarregar lista de usuários após criar/editar
-  //       axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=usuarios")
-  //         .then(response => {
-  //           const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
-  //           if (decryptedData) {
-  //             setUsers(decryptedData);
-  //           }
-  //         });
-  
-  //       setOpenDialog(false);
-  //     })
-  //     .catch(error => {
-  //       const errorMessage = decryptAES(error.response.data, '0123456789ABCDEF0123456789ABCDEF');
-  //       console.error('Erro ao salvar usuário:', errorMessage);
-  //       setSnackbar({
-  //         open: true,
-  //         message: errorMessage?.message || 'Erro ao salvar usuário',
-  //         severity: 'error'
-  //       });
-  //     });
-  // };
-  
+
   // Deletar usuário
   const handleDeleteUser = async (userId) => {
     try {
-      await axios.delete(
-        `https://hospitalemcor.com.br/claviscord/api/index.php?table=usuarios&id=${userId}`
-      );
-      axios.get("https://hospitalemcor.com.br/claviscord/api/index.php?table=usuarios")
-          .then(response => {
-            const decryptedData = decryptAES(response.data, '0123456789ABCDEF0123456789ABCDEF');
-            if (decryptedData) {
-              setUsers(decryptedData);
-            }
-          });
-      setSnackbar({
-        open: true,
-        message: 'Usuário deletado',
-        severity: 'success'
-      });
+      const { error } = await supabase
+        .from("usuarios")
+        .delete()
+        .eq("id", userId);
 
-     // Recarregar lista de usuários
-    } catch (error) {
+      if (error) {
+        throw error;
+      }
+
+      const { data, error: fetchError } = await supabase
+        .from("usuarios")
+        .select("*");
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      setUsers(data);
       setSnackbar({
         open: true,
-        message: 'Erro ao deletar usuário',
-        severity: 'error'
+        message: "Usuário deletado",
+        severity: "success",
+      });
+    } catch (error) {
+      console.error("Erro ao deletar usuário:", error.message);
+      setSnackbar({
+        open: true,
+        message: "Erro ao deletar usuário",
+        severity: "error",
       });
     }
   };
@@ -394,10 +353,10 @@ function AdminUserManagement() {
   return (
     <div className="p-4 pt-2 border rounded">
       <h4>Gerenciamento de Usuários</h4>
-      
-      <Button 
-        variant="contained" 
-        color="primary" 
+
+      <Button
+        variant="contained"
+        color="primary"
         onClick={handleOpenNewUserDialog}
         className="mb-3"
       >
@@ -420,21 +379,21 @@ function AdminUserManagement() {
                 <TableCell>{user.id}</TableCell>
                 <TableCell>{user.nome}</TableCell>
                 <TableCell>
-                  <Switch 
-                    checked={user.adm === true} 
-                    color="primary" 
+                  <Switch
+                    checked={user.adm === true}
+                    color="primary"
                     disabled
                   />
                 </TableCell>
                 <TableCell>
-                  <IconButton 
-                    color="primary" 
+                  <IconButton
+                    color="primary"
                     onClick={() => handleEditUser(user)}
                   >
                     <i className="fas fa-pencil-alt    "></i>
                   </IconButton>
-                  <IconButton 
-                    color="secondary" 
+                  <IconButton
+                    color="secondary"
                     onClick={() => handleDeleteUser(user.id)}
                   >
                     <i className="fas fa-trash    "></i>
@@ -449,7 +408,7 @@ function AdminUserManagement() {
       {/* Diálogo para criar/editar usuário */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>
-          {isEditing ? 'Editar Usuário' : 'Novo Usuário'}
+          {isEditing ? "Editar Usuário" : "Novo Usuário"}
         </DialogTitle>
         <DialogContent>
           <TextField
@@ -458,10 +417,12 @@ function AdminUserManagement() {
             label="Nome"
             fullWidth
             value={currentUser.nome}
-            onChange={(e) => setCurrentUser({
-              ...currentUser, 
-              nome: e.target.value
-            })}
+            onChange={(e) =>
+              setCurrentUser({
+                ...currentUser,
+                nome: e.target.value,
+              })
+            }
           />
           <TextField
             margin="dense"
@@ -469,18 +430,24 @@ function AdminUserManagement() {
             type="password"
             fullWidth
             value={currentUser.senha}
-            onChange={(e) => setCurrentUser({
-              ...currentUser, 
-              senha: e.target.value
-            })}
-            helperText={isEditing ? 'Deixe em branco para manter a senha atual' : ''}
+            onChange={(e) =>
+              setCurrentUser({
+                ...currentUser,
+                senha: e.target.value,
+              })
+            }
+            helperText={
+              isEditing ? "Deixe em branco para manter a senha atual" : ""
+            }
           />
           <Switch
             checked={currentUser.adm === true}
-            onChange={(e) => setCurrentUser({
-              ...currentUser, 
-              adm: e.target.checked
-            })}
+            onChange={(e) =>
+              setCurrentUser({
+                ...currentUser,
+                adm: e.target.checked,
+              })
+            }
           />
           <span>Administrador</span>
         </DialogContent>
@@ -498,7 +465,7 @@ function AdminUserManagement() {
         autoHideDuration={6000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
       >
-        <Alert 
+        <Alert
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.severity}
         >
